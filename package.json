@@ -1,16 +1,12 @@
 {
-  "name": "milo_concept",
+  "name": "miloconcept",
   "version": "1.0.0",
-  "description": "",
+  "description": "Milo Concept Store",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -25,5 +21,7 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "author": "",
+  "license": "ISC"
 }
