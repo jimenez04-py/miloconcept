@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | Concept Milo</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="auth-page">
+
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-logo">
+                <a href="index.html">
+                    <img src="images/logo_transparent.png" alt="Milo Concept">
+                </a>
+            </div>
+            <h2 class="auth-title">Bienvenido de nuevo</h2>
+            <p class="auth-subtitle">Inicia sesión en tu cuenta</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="email" required placeholder="nombre@ejemplo.com">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                    <span class="toggle-password" id="togglePassword">Mostrar</span>
+                </div>
+                <button type="submit" class="auth-btn">Iniciar Sesión</button>
+            </form>
+            <p class="auth-footer">
+                ¿No tienes una cuenta? <a href="register.html">Crear una</a>
+            </p>
+            <a href="index.html" class="guest-link">Continuar como Invitado</a>
+        </div>
+    </div>
+
+    <script>
+        // Password Visibility Toggle
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        toggleBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleBtn.textContent = type === 'password' ? 'Mostrar' : 'Ocultar';
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch(`/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'index.html'; // Changed to index.html
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Falló el inicio de sesión');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosotros | Milo Concept</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        .about-page {
+            /* Milo Concept soft palette */
+            background-color: #F4F4F4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 120px 20px 60px;
+            text-align: center;
+        }
+
+        .about-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .about-header {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #737373;
+            /* Muted text */
+            margin-bottom: 40px;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+        }
+
+        .about-text-content {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #353535;
+            font-weight: 300;
+        }
+
+        .signature {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #353535;
+            font-style: italic;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+
+            .about-image {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="menu-icon mobile-only" id="mobile-menu-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <div class="logo">
+            <a href="index.html">
+                <img src="images/logo_transparent.png" alt="Milo Concept" class="logo-img">
+            </a>
+        </div>
+
+        <nav class="desktop-nav">
+            <!-- Holiday removed -->
+            <a href="about.html" class="nav-link">Nosotros</a>
+            <a href="login.html" class="nav-link">Cuenta</a>
+            <div class="cart-icon" id="cart-trigger">Carrito (0)</div>
+        </nav>
+
+        <!-- Mobile Cart Icon -->
+        <div class="cart-icon mobile-only" id="mobile-cart-trigger">Carrito (0)</div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-drawer" id="mobile-menu">
+        <button class="close-menu" id="close-menu">&times;</button>
+        <nav class="mobile-nav">
+            <a href="index.html" class="mobile-nav-link">Inicio</a>
+            <a href="shop.html" class="mobile-nav-link">Ver Todo</a>
+            <a href="shop.html?cat=skin" class="mobile-nav-link">Piel</a>
+            <a href="shop.html?cat=lips" class="mobile-nav-link">Labios</a>
+            <a href="shop.html?cat=face" class="mobile-nav-link">Rostro</a>
+            <a href="shop.html?cat=sets" class="mobile-nav-link">Sets</a>
+            <!-- Holiday removed -->
+            <a href="about.html" class="mobile-nav-link">Nosotros</a>
+            <a href="login.html" class="mobile-nav-link">Cuenta</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <a href="#">Instagram</a>
+            <a href="#">Tiktok</a>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        <div class="cart-header-tabs">
+            <button class="tab-btn active">Tu Carrito</button>
+        </div>
+        <div class="cart-items-container" id="cart-items-container">
+            <p class="empty-msg">Tu carrito está vacío.</p>
+        </div>
+        <div class="cart-footer">
+            <div class="subtotal-row">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Pagar</button>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <section class="about-page">
+        <div class="about-container">
+            <h4 class="about-header">UNA NOTA DE NUESTRO FUNDADOR</h4>
+
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="images/hero_editorial_1765314912736.png" alt="Milo Concept Founder">
+                </div>
+                <div class="about-text-content">
+                    <p>
+                        Mi viaje hacia una piel más saludable me inspiró a desarrollar productos que realmente
+                        funcionen, de una manera
+                        que sea accesible para todos. Milo Concept se dedica a crear productos basados en la ciencia y
+                        una gran
+                        formulación, simplificando muchos de los misterios y narrativas complejas detrás del cuidado de
+                        la piel
+                        eficaz. Espero que estos se conviertan en tus esenciales imprescindibles que puedan vivir en tu
+                        baño, ser tu
+                        compañero de viaje favorito, mejorar tu piel con el tiempo y mantenerla feliz e hidratada.
+                    </p>
+                    <div class="signature">
+                        Milo
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Tienda</h4>
+                <a href="shop.html?cat=skin">Piel</a>
+                <a href="shop.html?cat=lips">Labios</a>
+                <a href="shop.html?cat=face">Rostro</a>
+                <a href="shop.html?cat=sets">Sets</a>
+            </div>
+            <div class="footer-col">
+                <h4>Nosotros</h4>
+                <a href="about.html">Nuestra Historia</a>
+                <a href="#">Carreras</a>
+            </div>
+            <div class="footer-col">
+                <h4>Soporte</h4>
+                <a href="#">Preguntas Frecuentes</a>
+                <a href="#">Contacto</a>
+                <a href="#">Envíos</a>
+            </div>
+            <div class="footer-col">
+                <h4>Mantente Actualizado</h4>
+                <div class="input-group">
+                    <input type="email" placeholder="Ingresa tu correo">
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 Milo Concept. Todos los derechos reservados.</span>
+            <span>Política de Privacidad &middot; Términos</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | Milo Concept</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            padding-top: 100px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .btn-submit {
+            background: #353535;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #000;
+        }
+
+        .product-list {
+            margin-top: 50px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .product-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 4px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .btn-delete {
+            color: red;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            background: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <img src="images/logo_transparent.png" alt="Milo Concept" class="logo-img">
+        </div>
+        <nav class="desktop-nav">
+            <a href="index.html" class="nav-link">Inicio</a>
+            <a href="#" class="nav-link"
+                onclick="localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload();">Cerrar
+                Sesión</a>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Gestión de Productos</h1>
+            <p>Agrega productos a la tienda sin código.</p>
+        </div>
+
+        <div class="admin-card">
+            <h2>Agregar Nuevo Producto</h2>
+            <form id="product-form">
+                <div class="form-grid">
+                    <div>
+                        <label>Título del Producto</label>
+                        <input type="text" id="p-title" required placeholder="ej. Base de Seda">
+                    </div>
+                    <div>
+                        <label>Precio</label>
+                        <input type="text" id="p-price" required placeholder="ej. $850.00">
+                    </div>
+
+                    <div class="full-width">
+                        <label>Descripción</label>
+                        <textarea id="p-desc" rows="3" placeholder="Descripción corta"></textarea>
+                    </div>
+
+                    <div>
+                        <label>Categoría</label>
+                        <select id="p-category">
+                            <option value="skin">Piel</option>
+                            <option value="lips">Labios</option>
+                            <option value="face">Rostro</option>
+                            <option value="sets">Sets</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Etiqueta</label>
+                        <select id="p-badge">
+                            <option value="">Ninguna</option>
+                            <option value="Best Seller">Más Vendido</option>
+                            <option value="Limited Edition">Edición Limitada</option>
+                            <option value="Trending">Tendencia</option>
+                            <option value="Exclusive">Exclusivo</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>URL Imagen Principal</label>
+                        <input type="text" id="p-img-main" required placeholder="https://...">
+                    </div>
+                    <div>
+                        <label>URL Imagen Hover</label>
+                        <input type="text" id="p-img-hover" required placeholder="https://...">
+                    </div>
+
+                    <div>
+                        <label>Calificación (1-5)</label>
+                        <input type="number" id="p-rating" step="0.1" value="5.0">
+                    </div>
+                    <div>
+                        <label>Número de Reseñas</label>
+                        <input type="number" id="p-reviews" value="100">
+                    </div>
+
+                    <div class="full-width">
+                        <label style="margin-top: 20px; font-size: 1.1rem;">Tonos / Variantes del Producto</label>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Agrega diferentes colores o
+                            estilos
+                            para este producto. Cada tono puede tener su propia imagen.</p>
+
+                        <div id="variants-container">
+                            <!-- Variant rows will be added here -->
+                        </div>
+
+                        <button type="button" onclick="addVariantRow()"
+                            style="background: #eee; border: 1px dashed #999; padding: 10px; width: 100%; cursor: pointer; margin-top: 10px; font-weight: 600;">+
+                            Agregar Nuevo Tono</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 30px;">Agregar Producto</button>
+            </form>
+        </div>
+
+        <div class="product-list">
+            <h2>Productos Existentes</h2>
+            <div id="product-list-container">
+                <!-- Loaded via JS -->
+                <p>Cargando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '';
+
+        let editingProductId = null;
+
+        function addVariantRow(data = null) {
+            const container = document.getElementById('variants-container');
+            const row = document.createElement('div');
+            row.className = 'variant-row';
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '1fr 1fr 1fr auto';
+            row.style.gap = '10px';
+            row.style.marginBottom = '10px';
+            row.style.padding = '15px';
+            row.style.background = '#f9f9f9';
+            row.style.border = '1px solid #eee';
+            row.style.borderRadius = '4px';
+
+            row.innerHTML = `
+                <div>
+                    <label>Nombre del Tono</label>
+                    <input type="text" class="v-name" placeholder="ej. Rosa Dulce" value="${data ? data.name : ''}">
+                </div>
+                <div>
+                    <label>Imagen del Producto (Tono)</label>
+                    <input type="text" class="v-image" placeholder="URL a imagen grande" value="${data ? data.image : ''}">
+                </div>
+                <div>
+                    <label>Muestra (Color/URL)</label>
+                    <input type="text" class="v-swatch" placeholder="Hex #000 o URL a img círculo" value="${data ? (data.hex || data.swatchImg || '') : ''}">
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer; font-size:1.5rem; padding-bottom:5px;">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        // Load Products
+        async function loadProducts() {
+            const container = document.getElementById('product-list-container');
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const products = await res.json();
+                window.allProducts = products; // Store for edit
+
+                if (products.length === 0) {
+                    container.innerHTML = '<p>No se encontraron productos.</p>';
+                    return;
+                }
+
+                container.innerHTML = products.map(p => `
+                    <div class="product-item">
+                        <img src="${p.imageMain}" alt="${p.title}">
+                        <div class="product-info">
+                            <strong>${p.title}</strong> 
+                            ${p.badge ? `<span style="background:#000; color:#fff; padding:2px 6px; font-size:10px; border-radius:4px; margin-left:5px;">${p.badge}</span>` : ''}
+                            <br>
+                            <small>${p.category} | ${p.price}</small>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-delete" style="color:blue;" onclick="editProduct(${p.id})">Editar</button>
+                            <button class="btn-delete" onclick="deleteProduct(${p.id})">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                const msg = `Error loading products: ${err.message}.`;
+                container.innerHTML = `<p style="color:red;">${msg}<br>Check console for more details.</p>`;
+            }
+        }
+
+        // Edit Product
+        function editProduct(id) {
+            const p = window.allProducts.find(x => x.id === id);
+            if (!p) return;
+
+            editingProductId = p.id;
+            document.getElementById('p-title').value = p.title;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-desc').value = p.desc;
+            document.getElementById('p-category').value = p.category;
+            document.getElementById('p-badge').value = p.badge || '';
+            document.getElementById('p-img-main').value = p.imageMain;
+            document.getElementById('p-img-hover').value = p.imageHover;
+            document.getElementById('p-rating').value = p.rating;
+            document.getElementById('p-reviews').value = p.reviews;
+
+            // Load Variants
+            document.getElementById('variants-container').innerHTML = '';
+            if (p.variants) {
+                try {
+                    const variants = JSON.parse(p.variants);
+                    variants.forEach(v => addVariantRow(v));
+                } catch (e) { console.error("Error parsing variants", e); }
+            }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = "Actualizar Producto";
+            btn.style.backgroundColor = "#007bff";
+
+            // Scroll to form
+            document.querySelector('.admin-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Add/Update Product Handler
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const product = {
+                title: document.getElementById('p-title').value,
+                price: document.getElementById('p-price').value,
+                desc: document.getElementById('p-desc').value,
+                category: document.getElementById('p-category').value,
+                badge: document.getElementById('p-badge').value,
+                imageMain: document.getElementById('p-img-main').value,
+                imageHover: document.getElementById('p-img-hover').value,
+                rating: document.getElementById('p-rating').value,
+                reviews: document.getElementById('p-reviews').value
+            };
+
+            // Collect Variants
+            const variantRows = document.querySelectorAll('.variant-row');
+            const variants = [];
+            variantRows.forEach(row => {
+                const name = row.querySelector('.v-name').value;
+                const image = row.querySelector('.v-image').value;
+                const swatch = row.querySelector('.v-swatch').value;
+                if (name && image) {
+                    const v = { name, image };
+                    if (swatch.startsWith('#') || swatch.length < 10) {
+                        v.hex = swatch;
+                    } else {
+                        v.swatchImg = swatch;
+                    }
+                    variants.push(v);
+                }
+            });
+            product.variants = JSON.stringify(variants);
+
+            try {
+                let res;
+                if (editingProductId) {
+                    // UPDATE
+                    res = await fetch(`${API_URL}/products/${editingProductId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(product)
+                    });
+                } else {
+                    // CREATE
+                    res = await fetch(`${API_URL}/products`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(product)
+                    });
+                }
+
+                if (res.ok) {
+                    alert(editingProductId ? '¡Producto Actualizado!' : '¡Producto Agregado!');
+                    document.getElementById('product-form').reset();
+                    document.getElementById('variants-container').innerHTML = '';
+                    editingProductId = null;
+                    document.querySelector('.btn-submit').innerText = "Agregar Producto";
+                    document.querySelector('.btn-submit').style.backgroundColor = "#353535";
+                    loadProducts();
+                } else {
+                    let errorMessage;
+                    try {
+                        const data = await res.json();
+                        errorMessage = data.error;
+                    } catch (e) {
+                        const text = await res.text();
+                        // Preview first 50 chars of text to avoid huge HTML
+                        errorMessage = `Status ${res.status} ${res.statusText}: ${text.substring(0, 50)}...`;
+                    }
+                    alert('Error al guardar producto: ' + errorMessage);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Client/Network Error: ' + err.message);
+            }
+        });
+
+        // Delete Product
+        async function deleteProduct(id) {
+            if (!confirm('¿Estás seguro?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
+                if (res.ok) loadProducts();
+            } catch (e) { console.error(e); }
+        }
+
+        loadProducts();
+    </script>
+</body>
+
+</html>

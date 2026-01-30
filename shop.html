@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda | Concept Milo</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/product_foundation_1765314926411.png">
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="menu-icon mobile-only">
+            <span></span>
+            <span></span>
+        </div>
+
+        <nav class="desktop-nav">
+            <a href="shop.html" class="nav-link">Tienda</a>
+            <a href="shop.html?cat=skin" class="nav-link">Piel</a>
+            <a href="shop.html?cat=lips" class="nav-link">Labios</a>
+            <a href="shop.html?cat=face" class="nav-link">Rostro</a>
+            <a href="shop.html?cat=sets" class="nav-link">Sets</a>
+        </nav>
+
+        <div class="logo">
+            <a href="index.html">
+                <img src="images/logo_transparent.png" alt="Milo Concept" class="logo-img">
+            </a>
+        </div>
+
+        <nav class="desktop-nav">
+
+
+            <a href="about.html" class="nav-link">Nosotros</a>
+            <a href="login.html" class="nav-link">Cuenta</a>
+            <div class="cart-icon" id="cart-trigger">Carrito (0)</div>
+        </nav>
+
+        <div class="cart-icon mobile-only" id="cart-trigger-mobile">
+            CARRITO (0)
+        </div>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="mobile-menu-drawer" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <button class="close-menu" id="close-menu">&times;</button>
+        </div>
+        <nav class="mobile-nav">
+            <a href="index.html" class="mobile-nav-link">Inicio</a>
+            <a href="shop.html" class="mobile-nav-link">Ver Todo</a>
+            <a href="shop.html?cat=skin" class="mobile-nav-link">Piel</a>
+            <a href="shop.html?cat=lips" class="mobile-nav-link">Labios</a>
+            <a href="shop.html?cat=face" class="mobile-nav-link">Rostro</a>
+            <a href="shop.html?cat=sets" class="mobile-nav-link">Sets</a>
+
+
+            <a href="about.html" class="mobile-nav-link">Nosotros</a>
+            <a href="login.html" class="mobile-nav-link">Cuenta</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <p>&copy; 2024 Concept Milo</p>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-header-tabs">
+            <button class="tab-btn" onclick="window.location.href='login.html'">Cuenta</button>
+            <button class="tab-btn active" id="cart-tab-trigger">Carrito (0)</button>
+            <button class="close-cart-btn" id="close-cart">&times;</button>
+        </div>
+
+        <div class="cart-items-container">
+            <div class="cart-items">
+                <p class="empty-msg">Tu carrito está vacío.</p>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <!-- Address Form -->
+            <div class="address-form" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+                <p
+                    style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600;">
+                    Detalles de Envío</p>
+
+                <!-- Region Selector (Keep this for cost calculation) -->
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label
+                        style="display: block; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; color: #888;">Estado
+                        / Región *</label>
+                    <select id="shipping-state" onchange="calculateShipping()"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; font-family: 'Inter', sans-serif; font-size: 13px; background: white;">
+                        <option value="" disabled selected>Seleccionar Región</option>
+                        <option value="Tabasco">Mexico/Villahermosa (Envio Gratis)</option>
+                        <option value="Monterrey">Centro - $150</option>
+                        <option value="Puebla">Lugares seleccionados - $200</option>
+                        <option value="General">A todo México - $230</option>
+                    </select>
+                </div>
+
+                <!-- Specific Address Fields -->
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <input type="text" id="addr-street" placeholder="Calle y Número *"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                </div>
+
+                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="addr-colony" placeholder="Colonia *"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                    <input type="text" id="addr-zip" placeholder="Código Postal *"
+                        style="width: 80px; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                </div>
+
+                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="addr-city" placeholder="Ciudad *"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                    <input type="tel" id="addr-phone" placeholder="Teléfono *"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                </div>
+            </div>
+            <div class="subtotal-row">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="subtotal-row shipping-row">
+                <span>Envío</span>
+                <span id="cart-shipping">$100.00</span>
+            </div>
+            <p class="shipping-note">Envío e impuestos calculados al finalizar.</p>
+            <button class="checkout-btn">
+                <span>Continuar</span>
+                <span id="btn-total">$0.00</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Shop Page Content -->
+    <main class="shop-page">
+
+        <!-- Shop Header Section -->
+        <section class="shop-header-section">
+            <div class="breadcrumbs">
+                <a href="index.html">Inicio</a> <span class="divider">/</span> <span class="current-crumb">Tienda</span>
+            </div>
+
+            <h1 class="shop-page-title">Piel</h1>
+            <p class="shop-page-subtitle">cuatro esenciales diarios</p>
+        </section>
+
+        <!-- Product Grid -->
+        <section class="products shop-products">
+            <div class="product-grid" id="shop-product-grid">
+                <!-- Products will be injected via JS -->
+                <!-- Fallback content if JS fails -->
+                <p>Cargando productos...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Tienda</h4>
+                <a href="shop.html?cat=skin">Piel</a>
+                <a href="shop.html?cat=lips">Labios</a>
+                <a href="shop.html?cat=face">Rostro</a>
+                <a href="shop.html?cat=sets">Sets</a>
+            </div>
+            <div class="footer-col">
+                <h4>Nosotros</h4>
+                <a href="#">Nuestra Historia</a>
+                <a href="#">Ingredientes</a>
+                <a href="#">Sostenibilidad</a>
+            </div>
+            <div class="footer-col newsletter">
+                <h4>Mantente Refinada</h4>
+                <div class="input-group">
+                    <input type="email" placeholder="Correo Electrónico">
+                    <button>&rarr;</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Concept Milo. Todos los derechos reservados.</p>
+            <div class="socials">
+                <a href="#">IG</a>
+                <a href="#">TT</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Product Quick View Modal -->
+    <div class="modal-overlay" id="product-modal-overlay"></div>
+    <div class="product-modal" id="product-modal">
+        <button class="close-modal" id="close-modal">&times;</button>
+        <div class="modal-body">
+            <!-- Left: Image -->
+            <div class="modal-image-col">
+                <img src="" alt="Product Detail" id="modal-img">
+            </div>
+            <!-- Right: Details -->
+            <div class="modal-info-col">
+                <span class="modal-subtitle">Belleza Refinada</span>
+                <h2 id="modal-title">Nombre del Producto</h2>
+                <p class="modal-desc" id="modal-desc">Descripción aquí.</p>
+
+                <!-- Color Selection -->
+                <div class="color-selection-area" id="modal-color-area">
+                    <div class="selected-color-label">
+                        Seleccionado: <span id="selected-color-name">001 Pink</span>
+                    </div>
+                    <div class="color-swatches">
+                        <!-- Swatches will be injected via JS -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="modal-add-btn">Agregar al Carrito &mdash; <span
+                            id="modal-price">$0.00</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

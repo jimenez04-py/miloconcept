@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Exitoso | Concept Milo</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .success-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            flex-direction: column;
+            background: #FAFAFA;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body class="success-page">
+
+    <div id="status-content">
+        <h1 class="auth-title">Procesando Pedido...</h1>
+        <p class="loading">Por favor espera mientras confirmamos tu pago y generamos tu recibo.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentId = urlParams.get('payment_id');
+            const status = urlParams.get('status');
+
+            if (status === 'approved') {
+                // Get Cart and User from LocalStorage
+                const cart = JSON.parse(localStorage.getItem('cart_backup') || '[]');
+                const user = JSON.parse(localStorage.getItem('user'));
+                const token = localStorage.getItem('token');
+
+                // Calculate Total
+                const total = cart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+
+                const finalData = {
+                    payment_id: paymentId,
+                    user_id: user ? user.id : null,
+                    email: user ? user.email : null,
+                    cart_items: cart,
+                    total: total
+                };
+
+                const processOrder = async (emailToUse) => {
+                    if (emailToUse) finalData.email = emailToUse;
+
+                    try {
+                        const res = await fetch(`http://${window.location.hostname}:3000/finalize_order`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(finalData)
+                        });
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            document.getElementById('status-content').innerHTML = `
+                                <div class="success-icon">✓</div>
+                                <h1 class="auth-title">¡Gracias!</h1>
+                                <p>Tu pedido #${paymentId} ha sido confirmado.</p>
+                                <p>Se ha enviado un recibo a <strong>${finalData.email}</strong>.</p>
+                                <a href="index.html" class="auth-btn" style="display:inline-block; margin-top:30px; text-decoration:none;">Volver al Inicio</a>
+                            `;
+                            localStorage.removeItem('cart_backup');
+                        } else {
+                            throw new Error(data.error || 'Server error');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        document.getElementById('status-content').innerHTML = `
+                            <h1 class="auth-title">Pedido Recibido</h1>
+                            <p>Sin embargo, tuvimos problemas para procesar el correo de recibo automáticamente.</p>
+                            <p>Error: ${err.message}</p>
+                            <a href="index.html" class="auth-btn" style="display:inline-block; margin-top:30px; text-decoration:none;">Volver al Inicio</a>
+                        `;
+                    }
+                };
+
+                if (!finalData.email) {
+                    // Show email prompt for guest
+                    document.getElementById('status-content').innerHTML = `
+                        <h1 class="auth-title">¡Casi Listo!</h1>
+                        <p>¿A dónde deberíamos enviar tu recibo?</p>
+                        <div class="auth-box" style="box-shadow:none; padding: 20px 0;">
+                            <div class="input-group">
+                                <label>Correo Electrónico</label>
+                                <input type="email" id="guest-email" required placeholder="nombre@ejemplo.com" style="text-align:center;">
+                            </div>
+                            <button id="send-receipt-btn" class="auth-btn">Enviar Mi Recibo</button>
+                        </div>
+                    `;
+                    document.getElementById('send-receipt-btn').addEventListener('click', () => {
+                        const email = document.getElementById('guest-email').value;
+                        if (email) processOrder(email);
+                        else alert("Por favor ingresa un correo válido");
+                    });
+                } else {
+                    processOrder();
+                }
+
+            } else {
+                document.getElementById('status-content').innerHTML = `
+                    <h1 class="auth-title">Pago Fallido o Pendiente</h1>
+                    <p>Estado: ${status}</p>
+                    <a href="shop.html" class="auth-btn" style="display:inline-block; margin-top:30px; text-decoration:none;">Intentar de Nuevo</a>
+                `;
+            }
+        });
+    </script>
+</body>
+
+</html>
