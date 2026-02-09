@@ -57,6 +57,15 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 console.log("Migration: Added variants column to products table.");
             }
         });
+        // Suggestions Table
+        db.run(`CREATE TABLE IF NOT EXISTS suggestions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_name TEXT,
+            user_name TEXT,
+            user_email TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
     }
 });
 

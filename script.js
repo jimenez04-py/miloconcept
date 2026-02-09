@@ -576,13 +576,82 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (pageSubtitle) pageSubtitle.innerText = info.subtitle;
                     if (breadcrumbCurrent) breadcrumbCurrent.innerText = category === 'all' ? 'Ver Todo' : (TITLES[category] ? TITLES[category].title : category);
 
-                    // 4. FILTER PRODUCTS
-                    const filteredProducts = category === 'all'
+                    // 4. FILTER PRODUCTS INITIALLY
+                    let currentCategoryProducts = category === 'all'
                         ? products
                         : products.filter(p => p.category === category);
 
-                    // 5. RENDER GRID
-                    renderGrid(shopGrid, filteredProducts);
+                    // 5. RENDER INITIAL GRID
+                    renderGrid(shopGrid, currentCategoryProducts);
+
+                    // 6. SEARCH LOGIC
+                    const searchInput = document.getElementById('product-search');
+                    const noResultsArea = document.getElementById('no-results-area');
+
+                    if (searchInput) {
+                        searchInput.addEventListener('input', (e) => {
+                            const query = e.target.value.toLowerCase().trim();
+
+                            if (!query) {
+                                // If search is empty, show original category products
+                                renderGrid(shopGrid, currentCategoryProducts);
+                                if (noResultsArea) noResultsArea.style.display = 'none';
+                                shopGrid.style.display = 'grid';
+                                return;
+                            }
+
+                            // Filter from ALL products or just current category? usually ALL is better for search
+                            // But let's stick to current context if user is in a category?
+                            // Standard UX: Search usually searches everything.
+                            const searchResults = products.filter(p =>
+                                p.title.toLowerCase().includes(query) ||
+                                p.desc.toLowerCase().includes(query) ||
+                                p.category.toLowerCase().includes(query)
+                            );
+
+                            if (searchResults.length > 0) {
+                                renderGrid(shopGrid, searchResults);
+                                if (noResultsArea) noResultsArea.style.display = 'none';
+                                shopGrid.style.display = 'grid';
+                            } else {
+                                shopGrid.style.display = 'none';
+                                if (noResultsArea) noResultsArea.style.display = 'block';
+                            }
+                        });
+                    }
+
+                    // 7. SUGGESTION FORM LOGIC
+                    const suggestionForm = document.getElementById('suggestion-form');
+                    const feedbackMsg = document.getElementById('suggestion-feedback');
+
+                    if (suggestionForm) {
+                        suggestionForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const productName = document.getElementById('suggest-product-name').value;
+                            const userName = document.getElementById('suggest-user-name').value;
+
+                            try {
+                                const res = await fetch('/suggestions', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ product_name: productName, user_name: userName })
+                                });
+
+                                if (res.ok) {
+                                    suggestionForm.reset();
+                                    if (feedbackMsg) {
+                                        feedbackMsg.style.display = 'block';
+                                        setTimeout(() => { feedbackMsg.style.display = 'none'; }, 5000);
+                                    }
+                                } else {
+                                    alert('Error al enviar la sugerencia.');
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Error de conexión.');
+                            }
+                        });
+                    }
                 }
 
                 /* -------------------------------------------------------------------------- */

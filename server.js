@@ -103,6 +103,51 @@ app.delete('/products/:id', (req, res) => {
         res.json({ message: 'Product deleted' });
     });
 });
+// --------------------------------------------------------------------------
+// SUGGESTION ROUTES
+// --------------------------------------------------------------------------
+
+// Get All Suggestions
+app.get('/suggestions', (req, res) => {
+    db.all(`SELECT * FROM suggestions ORDER BY created_at DESC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        res.json(rows);
+    });
+});
+
+// Add Suggestion
+app.post('/suggestions', (req, res) => {
+    const { product_name, user_name, user_email } = req.body;
+
+    if (!product_name) return res.status(400).json({ error: 'Product name is required' });
+
+    const sql = `INSERT INTO suggestions (product_name, user_name, user_email) VALUES (?, ?, ?)`;
+    db.run(sql, [product_name, user_name || 'Anonymous', user_email], function (err) {
+        if (err) return res.status(500).json({ error: 'Database error' });
+
+        // Notify Admin via Email
+        const mailOptions = {
+            from: '"Milo Concept" <noreply@milocosmetics.com>',
+            to: process.env.EMAIL_USER,
+            subject: `Nueva Sugerencia de Producto: ${product_name}`,
+            text: `Hola Admin,\n\nSe ha recibido una nueva sugerencia de producto:\n\nProducto: ${product_name}\nSugerido por: ${user_name || 'Anónimo'}\n\nRevisa el panel de administración para más detalles.`
+        };
+
+        if (transporter && process.env.EMAIL_USER) {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) console.log("Email error:", error);
+                else console.log('Admin notified: ' + info.response);
+            });
+        } else {
+            console.log("------------------------------------------");
+            console.log(`[MOCKED NOTIFICATION] New Suggestion: ${product_name}`);
+            console.log(`[BY] ${user_name || 'Anónimo'}`);
+            console.log("------------------------------------------");
+        }
+
+        res.status(201).json({ message: 'Suggestion recieved' });
+    });
+});
 
 // --------------------------------------------------------------------------
 // AUTH ROUTES

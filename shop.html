@@ -155,6 +155,15 @@
 
             <h1 class="shop-page-title">Piel</h1>
             <p class="shop-page-subtitle">cuatro esenciales diarios</p>
+
+            <!-- Search Bar -->
+            <div class="search-container"
+                style="margin-top: 20px; max-width: 400px; margin-left: auto; margin-right: auto; position: relative;">
+                <input type="text" id="product-search" placeholder="Buscar productos..."
+                    style="width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease;">
+                <span class="search-icon"
+                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888;">🔍</span>
+            </div>
         </section>
 
         <!-- Product Grid -->
@@ -163,6 +172,39 @@
                 <!-- Products will be injected via JS -->
                 <!-- Fallback content if JS fails -->
                 <p>Cargando productos...</p>
+            </div>
+
+            <!-- No Results & Suggestion Form -->
+            <div id="no-results-area" style="display: none; text-align: center; padding: 40px 20px;">
+                <h3
+                    style="font-family: 'Playfair Display', serif; font-size: 24px; color: #353535; margin-bottom: 10px;">
+                    No encontramos lo que buscas</h3>
+                <p style="font-family: 'Inter', sans-serif; color: #666; margin-bottom: 30px;">¿Tienes algo en mente?
+                    ¡Sugiérenos un producto!</p>
+
+                <form id="suggestion-form"
+                    style="max-width: 400px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 8px;">
+                    <div class="form-group" style="margin-bottom: 15px; text-align: left;">
+                        <label for="suggest-product-name"
+                            style="font-size: 12px; text-transform: uppercase; font-weight: 600; color: #333; display: block; margin-bottom: 5px;">Producto
+                            Sugerido *</label>
+                        <input type="text" id="suggest-product-name" required placeholder="Ej. Sérum de Vitamina C"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px; text-align: left;">
+                        <label for="suggest-user-name"
+                            style="font-size: 12px; text-transform: uppercase; font-weight: 600; color: #333; display: block; margin-bottom: 5px;">Tu
+                            Nombre (Opcional)</label>
+                        <input type="text" id="suggest-user-name" placeholder="Tu nombre"
+                            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+
+                    <button type="submit" class="checkout-btn" style="width: 100%; margin-top: 10px;">Enviar
+                        Sugerencia</button>
+                    <p id="suggestion-feedback" style="margin-top: 15px; font-size: 13px; color: green; display: none;">
+                        ¡Gracias por tu sugerencia!</p>
+                </form>
             </div>
         </section>
 

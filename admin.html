@@ -217,6 +217,14 @@
                 <p>Cargando...</p>
             </div>
         </div>
+
+        <div class="product-list" style="margin-top: 50px;">
+            <h2>Sugerencias de Productos</h2>
+            <div id="suggestions-container">
+                <!-- Loaded via JS -->
+                <p>Cargando sugerencias...</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -415,7 +423,37 @@
             } catch (e) { console.error(e); }
         }
 
+        // Load Suggestions
+        async function loadSuggestions() {
+            const container = document.getElementById('suggestions-container');
+            if (!container) return;
+            try {
+                const res = await fetch(`${API_URL}/suggestions`);
+                const suggestions = await res.json();
+
+                if (suggestions.length === 0) {
+                    container.innerHTML = '<p>No hay sugerencias aún.</p>';
+                    return;
+                }
+
+                container.innerHTML = suggestions.map(s => `
+                    <div class="product-item" style="border-left: 4px solid #353535;">
+                        <div class="product-info">
+                            <strong>Producto: ${s.product_name}</strong>
+                            <br>
+                            <small>Sugerido por: ${s.user_name || 'Anónimo'}</small>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color:red;">Error al cargar sugerencias.</p>`;
+            }
+        }
+
         loadProducts();
+        loadSuggestions();
     </script>
 </body>
 

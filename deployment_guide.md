@@ -16,7 +16,15 @@ Esta es la opción recomendada porque este proyecto usa **Node.js** y **SQLite**
 3.  **Encender el Servidor:** Ejecutas el comando `node server.js` (o usas una herramienta como PM2 para que se quede encendido por siempre).
 4.  **Configurar Dominio:** Apuntas tu dominio a la carpeta donde están los archivos HTML.
 
-### Opción B: Tienes un plan "Web Hosting" (Compartido/Básico)
+### Opción B: Hostinger "Setup Node.js App" (Probable)
+Muchos planes de Hostinger ahora incluyen una herramienta para Node.js.
+1. **Startup File:** Asegúrate de que apunte a `app.js` (lo acabamos de crear).
+2. **Package.json:** Hemos ajustado el archivo para que sea compatible.
+3. **Instalación:**
+   - Sube todos los archivos (excepto `node_modules`).
+   - Ve a la sección Node.js y haz clic en "Install Dependencies" (NPM Install).
+
+### Opción C: Tienes un plan "Web Hosting" Antiguo (Sin Node.js)
 Estos planes normalmente **NO permiten correr servidores Node.js** (el comando `node server.js` no funcionará o se apagará). Solo sirven para archivos estáticos.
 
 **Solución Híbrida:**
