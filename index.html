@@ -35,6 +35,7 @@
         </div>
 
         <nav class="desktop-nav">
+            <a href="#" class="nav-link" id="search-trigger">Buscar</a>
             <a href="about.html" class="nav-link">Nosotros</a>
             <a href="login.html" class="nav-link">Cuenta</a>
             <div class="cart-icon" id="cart-trigger">Carrito (0)</div>
@@ -44,6 +45,28 @@
             CARRITO (0)
         </div>
     </header>
+
+    <!-- SEARCH DRAWER (Rhode Style - Right Side) -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-header-row">
+            <h2 class="search-title">search</h2>
+            <button class="close-search" id="close-search">&times;</button>
+        </div>
+
+        <div class="search-body">
+            <div class="search-input-wrapper">
+                <input type="text" id="overlay-search-input" placeholder="Search products..." autocomplete="off">
+            </div>
+
+            <p class="search-count" id="search-count-msg"></p>
+            <hr class="search-divider">
+
+            <div class="search-results-list" id="search-results-container">
+                <!-- Results injected here -->
+            </div>
+        </div>
+    </div>
+    <div class="search-backdrop" id="search-backdrop"></div>
 
     <!-- Mobile Menu Drawer -->
     <div class="mobile-menu-drawer" id="mobile-menu">

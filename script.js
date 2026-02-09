@@ -585,6 +585,114 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderGrid(shopGrid, currentCategoryProducts);
 
 
+                    /* -------------------------------------------------------------------------- */
+                    /*                        SMART SEARCH DRAWER LOGIC                           */
+                    /* -------------------------------------------------------------------------- */
+                    const searchTrigger = document.getElementById('search-trigger');
+                    const searchOverlay = document.getElementById('search-overlay');
+                    const searchBackdrop = document.getElementById('search-backdrop');
+                    const closeSearchBtn = document.getElementById('close-search');
+                    const overlaySearchInput = document.getElementById('overlay-search-input');
+                    const resultsContainer = document.getElementById('search-results-container');
+                    const searchCountMsg = document.getElementById('search-count-msg');
+
+                    function openSearch() {
+                        if (searchOverlay) searchOverlay.classList.add('active');
+                        if (searchBackdrop) searchBackdrop.classList.add('active');
+                        document.body.classList.add('search-drawer-open');
+                        if (overlaySearchInput) setTimeout(() => overlaySearchInput.focus(), 100);
+                    }
+
+                    function closeSearch() {
+                        if (searchOverlay) searchOverlay.classList.remove('active');
+                        if (searchBackdrop) searchBackdrop.classList.remove('active');
+                        document.body.classList.remove('search-drawer-open');
+                        if (overlaySearchInput) overlaySearchInput.value = ''; // Optional: clear on close
+                    }
+
+                    if (searchTrigger) {
+                        searchTrigger.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            openSearch();
+                        });
+                    }
+
+                    if (closeSearchBtn) closeSearchBtn.addEventListener('click', closeSearch);
+                    if (searchBackdrop) searchBackdrop.addEventListener('click', closeSearch);
+
+                    // Perform Search
+                    function performSearch(query) {
+                        query = query.toLowerCase().trim();
+
+                        if (!query) {
+                            if (resultsContainer) resultsContainer.innerHTML = '';
+                            if (searchCountMsg) searchCountMsg.innerText = '';
+                            return;
+                        }
+
+                        // Category Keyword Mapping
+                        const CATEGORY_KEYWORDS = {
+                            'fnd': 'skin',
+                            'skin': 'skin', 'piel': 'skin', 'base': 'skin',
+                            'lip': 'lips', 'labio': 'lips', 'boca': 'lips',
+                            'face': 'face', 'rostro': 'face', 'cara': 'face',
+                            'set': 'sets', 'kit': 'sets', 'rutina': 'sets'
+                        };
+
+                        let matchedCategory = null;
+                        for (const [key, val] of Object.entries(CATEGORY_KEYWORDS)) {
+                            if (query.includes(key)) matchedCategory = val;
+                        }
+
+                        let searchResults = [];
+                        if (matchedCategory) {
+                            searchResults = products.filter(p => p.category === matchedCategory);
+                        } else {
+                            searchResults = products.filter(p =>
+                                p.title.toLowerCase().includes(query) ||
+                                p.desc.toLowerCase().includes(query) ||
+                                p.category.toLowerCase().includes(query)
+                            );
+                        }
+
+                        // Render Logic
+                        if (resultsContainer && searchCountMsg) {
+                            searchCountMsg.innerText = `${searchResults.length} results for '${query}'`;
+                            resultsContainer.innerHTML = '';
+
+                            if (searchResults.length === 0) {
+                                resultsContainer.innerHTML = '<p style="text-align:center; color:#999; margin-top:30px;">No results found.</p>';
+                            } else {
+                                searchResults.forEach(p => {
+                                    const row = document.createElement('div');
+                                    row.classList.add('search-item-row');
+                                    row.innerHTML = `
+                                        <img src="${p.imageMain}" alt="${p.title}" class="search-thumb">
+                                        <div class="search-item-info">
+                                            <h4 class="search-item-title">${p.title}</h4>
+                                        </div>
+                                    `;
+
+                                    row.addEventListener('click', () => {
+                                        openProductModal(p);
+                                        closeSearch();
+                                    });
+                                    resultsContainer.appendChild(row);
+                                });
+                            }
+                        }
+                    }
+
+                    if (overlaySearchInput) {
+                        let debounceTimeout;
+                        overlaySearchInput.addEventListener('input', (e) => {
+                            clearTimeout(debounceTimeout);
+                            debounceTimeout = setTimeout(() => {
+                                performSearch(e.target.value);
+                            }, 300);
+                        });
+                    }
+                    /* END SMART SEARCH LOGIC */
 
                     // 7. SUGGESTION FORM LOGIC
                     const suggestionForm = document.getElementById('suggestion-form');
