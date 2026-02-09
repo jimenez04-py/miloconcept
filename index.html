@@ -43,199 +43,198 @@
         <div class="cart-icon mobile-only" id="cart-trigger-mobile">
             CARRITO (0)
         </div>
-        <!-- Mobile Menu Drawer -->
-        <div class="mobile-menu-drawer" id="mobile-menu">
-            <div class="mobile-menu-header">
-                <button class="close-menu" id="close-menu">&times;</button>
-            </div>
-            <nav class="mobile-nav">
-                <a href="shop.html" class="mobile-nav-link">Ver Todo</a>
-                <a href="shop.html?cat=skin" class="mobile-nav-link">Piel</a>
-                <a href="shop.html?cat=lips" class="mobile-nav-link">Labios</a>
-                <a href="shop.html?cat=face" class="mobile-nav-link">Rostro</a>
-                <a href="shop.html?cat=sets" class="mobile-nav-link">Sets</a>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="mobile-menu-drawer" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <button class="close-menu" id="close-menu">&times;</button>
+        </div>
+        <nav class="mobile-nav">
+            <a href="shop.html" class="mobile-nav-link">Ver Todo</a>
+            <a href="shop.html?cat=skin" class="mobile-nav-link">Piel</a>
+            <a href="shop.html?cat=lips" class="mobile-nav-link">Labios</a>
+            <a href="shop.html?cat=face" class="mobile-nav-link">Rostro</a>
+            <a href="shop.html?cat=sets" class="mobile-nav-link">Sets</a>
 
 
-                <a href="about.html" class="mobile-nav-link">Nosotros</a>
-                <a href="login.html" class="mobile-nav-link">Cuenta</a>
-            </nav>
-            <div class="mobile-menu-footer">
-                <p>&copy; 2025 Concept Milo</p>
+            <a href="about.html" class="mobile-nav-link">Nosotros</a>
+            <a href="login.html" class="mobile-nav-link">Cuenta</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <p>&copy; 2025 Concept Milo</p>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-header-tabs">
+            <button class="tab-btn" onclick="window.location.href='login.html'">Cuenta</button>
+            <button class="tab-btn active" id="cart-tab-trigger">Carrito (0)</button>
+            <button class="close-cart-btn" id="close-cart">&times;</button>
+        </div>
+
+        <div class="cart-items-container">
+            <div class="cart-items">
+                <p class="empty-msg">Tu carrito está vacío.</p>
             </div>
         </div>
 
-        <!-- Cart Drawer -->
-        <div class="cart-overlay" id="cart-overlay"></div>
-        <div class="cart-drawer" id="cart-drawer">
-            <div class="cart-header-tabs">
-                <button class="tab-btn" onclick="window.location.href='login.html'">Cuenta</button>
-                <button class="tab-btn active" id="cart-tab-trigger">Carrito (0)</button>
-                <button class="close-cart-btn" id="close-cart">&times;</button>
+        <div class="cart-footer">
+            <div class="shipping-calc"
+                style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                <p
+                    style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    Calcular Envío
+                    <img src="images/skydropx_logo.png" alt="Skydropx" class="skydropx-logo-cart">
+                </p>
+                <div class="zip-input-group" style="display: flex; gap: 5px;">
+                    <input type="text" id="shipping-zip" placeholder="Código Postal (CP)"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; font-family: 'Inter', sans-serif; font-size: 13px; background: transparent;">
+                    <button onclick="calculateShipping()"
+                        style="padding: 0 15px; background: #333; color: #fff; border: none; cursor: pointer; font-size: 12px;">IR</button>
+                </div>
+                <div id="shipping-options" style="margin-top: 10px; font-size: 13px; color: #555;"></div>
             </div>
+            <div class="subtotal-row">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="subtotal-row shipping-row">
+                <span>Envío</span>
+                <span id="cart-shipping">$100.00</span>
+            </div>
+            <p class="shipping-note">Envío e impuestos calculados al finalizar.</p>
+            <button class="checkout-btn">
+                <span>Continuar</span>
+                <span id="btn-total">$0.00</span>
+            </button>
+        </div>
+    </div>
 
-            <div class="cart-items-container">
-                <div class="cart-items">
-                    <p class="empty-msg">Tu carrito está vacío.</p>
-                </div>
-            </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-image-container">
+            <img src="https://img.freepik.com/vector-premium/fondo-gradiente-color-rosa-claro-rojo_1084608-15004.jpg?semt=ais_hybrid&w=740&q=80"
+                alt="Milo Concept Holiday" class="parallax-img">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content fade-in-up">
+            <h1>Belleza Refinada</h1>
+            <p>Eleva lo cotidiano con nuestra nueva colección.</p>
+            <a href="shop.html" class="btn-primary">Ver Colección</a>
+        </div>
+    </section>
 
-            <div class="cart-footer">
-                <div class="shipping-calc"
-                    style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-                    <p
-                        style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                        Calcular Envío
-                        <img src="images/skydropx_logo.png" alt="Skydropx" class="skydropx-logo-cart">
-                    </p>
-                    <div class="zip-input-group" style="display: flex; gap: 5px;">
-                        <input type="text" id="shipping-zip" placeholder="Código Postal (CP)"
-                            style="width: 100%; padding: 10px; border: 1px solid #ddd; font-family: 'Inter', sans-serif; font-size: 13px; background: transparent;">
-                        <button onclick="calculateShipping()"
-                            style="padding: 0 15px; background: #333; color: #fff; border: none; cursor: pointer; font-size: 12px;">IR</button>
-                    </div>
-                    <div id="shipping-options" style="margin-top: 10px; font-size: 13px; color: #555;"></div>
-                </div>
-                <div class="subtotal-row">
-                    <span>Subtotal</span>
-                    <span id="cart-subtotal">$0.00</span>
-                </div>
-                <div class="subtotal-row shipping-row">
-                    <span>Envío</span>
-                    <span id="cart-shipping">$100.00</span>
-                </div>
-                <p class="shipping-note">Envío e impuestos calculados al finalizar.</p>
-                <button class="checkout-btn">
-                    <span>Continuar</span>
-                    <span id="btn-total">$0.00</span>
-                </button>
-            </div>
+    <!-- Intro Text -->
+    <section class="intro-text fade-in-scroll">
+        <p>Inspirado en el arte del minimalismo. <br> Creado para la musa moderna.</p>
+    </section>
+
+    <!-- Product Grid -->
+    <section class="products" id="products">
+        <div class="section-header fade-in-scroll">
+            <h2>Más Vendidos</h2>
         </div>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-image-container">
-                <img src="https://img.freepik.com/vector-premium/fondo-gradiente-color-rosa-claro-rojo_1084608-15004.jpg?semt=ais_hybrid&w=740&q=80"
-                    alt="Milo Concept Holiday" class="parallax-img">
-                <div class="hero-overlay"></div>
+        <div class="product-grid" id="home-product-grid">
+            <!-- Products will be loaded dynamically from the database via script.js -->
+            <p style="text-align: center; width: 100%;">Cargando...</p>
+        </div>
+    </section>
+
+    <!-- Holiday / Limited Edition -->
+    <section class="holiday-section fade-in-scroll">
+        <div class="holiday-content">
+            <span class="subtitle">Edición Limitada</span>
+            <h2>La Colección Gilded</h2>
+            <p>Destellos cálidos y tonos champaña para la temporada.</p>
+            <a href="#" class="btn-text">Descubrir Más &rarr;</a>
+        </div>
+        <div class="holiday-image parallax-container-sm">
+            <img src="https://sofiavbeauty.mx/cdn/shop/collections/240614_HighlighterLaunch_HighlighterDesktop.webp?v=1720216212"
+                alt="Gilded Collection" class="parallax-img">
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Tienda</h4>
+                <a href="shop.html?cat=skin">Piel</a>
+                <a href="shop.html?cat=lips">Labios</a>
+                <a href="shop.html?cat=face">Rostro</a>
+                <a href="shop.html?cat=sets">Sets</a>
             </div>
-            <div class="hero-content fade-in-up">
-                <h1>Belleza Refinada</h1>
-                <p>Eleva lo cotidiano con nuestra nueva colección.</p>
-                <a href="shop.html" class="btn-primary">Ver Colección</a>
+            <div class="footer-col">
+                <h4>Nosotros</h4>
+                <a href="#">Nuestra Historia</a>
+                <a href="#">Ingredientes</a>
+                <a href="#">Sostenibilidad</a>
             </div>
-        </section>
-
-        <!-- Intro Text -->
-        <section class="intro-text fade-in-scroll">
-            <p>Inspirado en el arte del minimalismo. <br> Creado para la musa moderna.</p>
-        </section>
-
-        <!-- Product Grid -->
-        <section class="products" id="products">
-            <div class="section-header fade-in-scroll">
-                <h2>Más Vendidos</h2>
-            </div>
-
-            <div class="product-grid" id="home-product-grid">
-                <!-- Products will be loaded dynamically from the database via script.js -->
-                <p style="text-align: center; width: 100%;">Cargando...</p>
-            </div>
-        </section>
-
-        <!-- Holiday / Limited Edition -->
-        <section class="holiday-section fade-in-scroll">
-            <div class="holiday-content">
-                <span class="subtitle">Edición Limitada</span>
-                <h2>La Colección Gilded</h2>
-                <p>Destellos cálidos y tonos champaña para la temporada.</p>
-                <a href="#" class="btn-text">Descubrir Más &rarr;</a>
-            </div>
-            <div class="holiday-image parallax-container-sm">
-                <img src="https://sofiavbeauty.mx/cdn/shop/collections/240614_HighlighterLaunch_HighlighterDesktop.webp?v=1720216212"
-                    alt="Gilded Collection" class="parallax-img">
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h4>Tienda</h4>
-                    <a href="shop.html?cat=skin">Piel</a>
-                    <a href="shop.html?cat=lips">Labios</a>
-                    <a href="shop.html?cat=face">Rostro</a>
-                    <a href="shop.html?cat=sets">Sets</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Nosotros</h4>
-                    <a href="#">Nuestra Historia</a>
-                    <a href="#">Ingredientes</a>
-                    <a href="#">Sostenibilidad</a>
-                </div>
-                <div class="footer-col newsletter">
-                    <h4>Mantente Refinada</h4>
-                    <div class="input-group">
-                        <input type="email" placeholder="Correo Electrónico">
-                        <button>&rarr;</button>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Concept Milo. Todos los derechos reservados.</p>
-                <div class="shipping-partner">
-                    <span class="shipping-label">Envíos vía</span>
-                    <img src="images/skydropx_logo.png" alt="Skydropx" class="skydropx-logo-footer">
-                </div>
-                <div class="socials">
-                    <a href="#">IG</a>
-                    <a href="#">TT</a>
-                </div>
-            </div>
-        </footer>
-
-
-        <!-- Product Quick View Modal -->
-        <div class="modal-overlay" id="product-modal-overlay"></div>
-        <div class="product-modal" id="product-modal">
-            <button class="close-modal" id="close-modal">&times;</button>
-            <div class="modal-body">
-                <!-- Left: Image -->
-                <div class="modal-image-col">
-                    <img src="" alt="Product Detail" id="modal-img">
-                </div>
-                <!-- Right: Details -->
-                <div class="modal-info-col">
-                    <span class="modal-subtitle">Belleza Refinada</span>
-                    <h2 id="modal-title">Nombre del Producto</h2>
-                    <p class="modal-desc" id="modal-desc">Descripción aquí.</p>
-
-                    <!-- Color Selection -->
-                    <div class="color-selection-area" id="modal-color-area">
-                        <div class="selected-color-label">
-                            Seleccionado: <span id="selected-color-name">001 Pink</span>
-                        </div>
-                        <div class="color-swatches">
-                            <!-- Swatches will be injected via JS -->
-                            <button class="swatch active" style="background-color: #F8B8D0;"
-                                data-color="001 Pink"></button>
-                            <button class="swatch" style="background-color: #FF8800;" data-color="004 Coral"></button>
-                            <button class="swatch" style="background-color: #FF2D55;"
-                                data-color="007 Raspberry"></button>
-                            <button class="swatch" style="background-color: #A50055;" data-color="006 Berry"></button>
-                            <button class="swatch" style="background-color: #600033;"
-                                data-color="012 Mahogany"></button>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="modal-add-btn">Agregar al Carrito &mdash; <span
-                                id="modal-price">$0.00</span></button>
-                    </div>
+            <div class="footer-col newsletter">
+                <h4>Mantente Refinada</h4>
+                <div class="input-group">
+                    <input type="email" placeholder="Correo Electrónico">
+                    <button>&rarr;</button>
                 </div>
             </div>
         </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Concept Milo. Todos los derechos reservados.</p>
+            <div class="shipping-partner">
+                <span class="shipping-label">Envíos vía</span>
+                <img src="images/skydropx_logo.png" alt="Skydropx" class="skydropx-logo-footer">
+            </div>
+            <div class="socials">
+                <a href="#">IG</a>
+                <a href="#">TT</a>
+            </div>
+        </div>
+    </footer>
 
-        <script src="script.js"></script>
+
+    <!-- Product Quick View Modal -->
+    <div class="modal-overlay" id="product-modal-overlay"></div>
+    <div class="product-modal" id="product-modal">
+        <button class="close-modal" id="close-modal">&times;</button>
+        <div class="modal-body">
+            <!-- Left: Image -->
+            <div class="modal-image-col">
+                <img src="" alt="Product Detail" id="modal-img">
+            </div>
+            <!-- Right: Details -->
+            <div class="modal-info-col">
+                <span class="modal-subtitle">Belleza Refinada</span>
+                <h2 id="modal-title">Nombre del Producto</h2>
+                <p class="modal-desc" id="modal-desc">Descripción aquí.</p>
+
+                <!-- Color Selection -->
+                <div class="color-selection-area" id="modal-color-area">
+                    <div class="selected-color-label">
+                        Seleccionado: <span id="selected-color-name">001 Pink</span>
+                    </div>
+                    <div class="color-swatches">
+                        <!-- Swatches will be injected via JS -->
+                        <button class="swatch active" style="background-color: #F8B8D0;" data-color="001 Pink"></button>
+                        <button class="swatch" style="background-color: #FF8800;" data-color="004 Coral"></button>
+                        <button class="swatch" style="background-color: #FF2D55;" data-color="007 Raspberry"></button>
+                        <button class="swatch" style="background-color: #A50055;" data-color="006 Berry"></button>
+                        <button class="swatch" style="background-color: #600033;" data-color="012 Mahogany"></button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="modal-add-btn">Agregar al Carrito &mdash; <span
+                            id="modal-price">$0.00</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
