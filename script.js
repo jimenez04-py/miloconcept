@@ -588,34 +588,110 @@ document.addEventListener('DOMContentLoaded', () => {
                     const searchInput = document.getElementById('product-search');
                     const noResultsArea = document.getElementById('no-results-area');
 
-                    if (searchInput) {
-                        searchInput.addEventListener('input', (e) => {
-                            const query = e.target.value.toLowerCase().trim();
+                    // Category Keyword Mapping
+                    const CATEGORY_KEYWORDS = {
+                        'fnd': 'skin', // Foundation
+                        'skin': 'skin',
+                        'piel': 'skin',
+                        'base': 'skin',
+                        'lip': 'lips',
+                        'labio': 'lips',
+                        'boca': 'lips',
+                        'face': 'face',
+                        'rostro': 'face',
+                        'cara': 'face',
+                        'set': 'sets',
+                        'kit': 'sets',
+                        'rutina': 'sets'
+                    };
 
-                            if (!query) {
-                                // If search is empty, show original category products
-                                renderGrid(shopGrid, currentCategoryProducts);
-                                if (noResultsArea) noResultsArea.style.display = 'none';
-                                shopGrid.style.display = 'grid';
-                                return;
+                    function performSearch(query) {
+                        query = query.toLowerCase().trim();
+
+                        // 1. Check for Direct Category Match
+                        let matchedCategory = null;
+                        for (const [key, val] of Object.entries(CATEGORY_KEYWORDS)) {
+                            if (query.includes(key)) {
+                                matchedCategory = val;
+                                break;
                             }
+                        }
 
-                            // Filter from ALL products or just current category? usually ALL is better for search
-                            // But let's stick to current context if user is in a category?
-                            // Standard UX: Search usually searches everything.
-                            const searchResults = products.filter(p =>
-                                p.title.toLowerCase().includes(query) ||
-                                p.desc.toLowerCase().includes(query) ||
-                                p.category.toLowerCase().includes(query)
-                            );
+                        if (matchedCategory) {
+                            // Switch to Category View (Grid Mode)
+                            shopGrid.classList.remove('list-view');
+                            const catProducts = products.filter(p => p.category === matchedCategory);
 
-                            if (searchResults.length > 0) {
-                                renderGrid(shopGrid, searchResults);
-                                if (noResultsArea) noResultsArea.style.display = 'none';
-                                shopGrid.style.display = 'grid';
-                            } else {
-                                shopGrid.style.display = 'none';
-                                if (noResultsArea) noResultsArea.style.display = 'block';
+                            // Update Titles
+                            if (pageTitle) pageTitle.innerText = TITLES[matchedCategory].title;
+                            if (pageSubtitle) pageSubtitle.innerText = TITLES[matchedCategory].subtitle;
+
+                            renderGrid(shopGrid, catProducts);
+                            shopGrid.style.display = 'grid';
+                            if (noResultsArea) noResultsArea.style.display = 'none';
+                            return;
+                        }
+
+                        // 2. Text Search (List Mode)
+                        if (!query) {
+                            shopGrid.classList.remove('list-view');
+                            // Reset to original category
+                            const originCat = new URLSearchParams(window.location.search).get('cat') || 'all';
+                            const originProducts = originCat === 'all' ? products : products.filter(p => p.category === originCat);
+                            const originInfo = TITLES[originCat] || TITLES['all'];
+
+                            if (pageTitle) pageTitle.innerText = originInfo.title;
+                            if (pageSubtitle) pageSubtitle.innerText = originInfo.subtitle;
+
+                            renderGrid(shopGrid, originProducts);
+                            shopGrid.style.display = 'grid';
+                            if (noResultsArea) noResultsArea.style.display = 'none';
+                            return;
+                        }
+
+                        const searchResults = products.filter(p =>
+                            p.title.toLowerCase().includes(query) ||
+                            p.desc.toLowerCase().includes(query) ||
+                            p.category.toLowerCase().includes(query) ||
+                            (p.badge && p.badge.toLowerCase().includes(query))
+                        );
+
+                        if (searchResults.length > 0) {
+                            // Enable List View
+                            shopGrid.classList.add('list-view');
+
+                            // Update Title
+                            if (pageTitle) pageTitle.innerText = `Resultados`;
+                            if (pageSubtitle) pageSubtitle.innerText = `${searchResults.length} encontrado(s) para "${query}"`;
+
+                            renderGrid(shopGrid, searchResults);
+                            // Add list-mode class to cards
+                            Array.from(shopGrid.children).forEach(card => card.classList.add('list-mode'));
+
+                            shopGrid.style.display = 'grid';
+                            if (noResultsArea) noResultsArea.style.display = 'none';
+                        } else {
+                            shopGrid.style.display = 'none';
+                            if (noResultsArea) noResultsArea.style.display = 'block';
+                            if (pageTitle) pageTitle.innerText = `Sin Resultados`;
+                            if (pageSubtitle) pageSubtitle.innerText = `Intenta con otra palabra`;
+                        }
+                    }
+
+                    if (searchInput) {
+                        let debounceTimeout;
+                        searchInput.addEventListener('input', (e) => {
+                            clearTimeout(debounceTimeout);
+                            debounceTimeout = setTimeout(() => {
+                                performSearch(e.target.value);
+                            }, 300); // Debounce for performance
+                        });
+
+                        // Also trigger on Enter
+                        searchInput.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                clearTimeout(debounceTimeout);
+                                performSearch(e.target.value);
                             }
                         });
                     }
@@ -663,7 +739,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     renderGrid(homeGrid, homeProducts);
                 }
-
             } catch (error) {
                 console.error("Error fetching products:", error);
                 const msg = `No se pudieron cargar los productos. Error: ${error.message}.`;
