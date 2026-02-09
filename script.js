@@ -651,7 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             searchResults = products.filter(p =>
                                 p.title.toLowerCase().includes(query) ||
                                 p.desc.toLowerCase().includes(query) ||
-                                p.category.toLowerCase().includes(query)
+                                p.category.toLowerCase().includes(query) ||
+                                (p.brand && p.brand.toLowerCase().includes(query))
                             );
                         }
 

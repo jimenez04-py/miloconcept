@@ -1643,160 +1643,163 @@ button {
         justify-content: center;
     }
 }
-/* SEARCH DRAWER (Rhode Style - Right Side) */
+
+/* FULL SCREEN SEARCH OVERLAY (Centered) */
 .search-overlay {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 450px;
-    max-width: 100%;
-    height: 100%;
-    background: #F9F9F9;
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    padding: 40px;
-    box-shadow: -5px 0 30px rgba(0,0,0,0.05); /* Soft shadow */
-    
-    transform: translateX(100%); /* Hidden by default */
-    opacity: 1;
-    visibility: visible;
-    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Elegant easing */
-}
-
-.search-overlay.active {
-    transform: translateX(0);
-}
-
-.search-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.25); /* Darken background */
-    z-index: 1999;
+    background: rgba(249, 249, 249, 0.98);
+    /* Light neutral, slight transparency */
+    z-index: 3000;
+    /* Above everything */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Center horizontally */
+    padding: 60px 20px;
+
+    /* Animation: Fade In */
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.search-drawer-open .search-backdrop {
+.search-overlay.active {
     opacity: 1;
     visibility: visible;
 }
 
-.search-header-row {
-    position: relative;
-    text-align: center;
-    margin-bottom: 30px;
+/* We don't need a separate backdrop as the overlay is full screen */
+.search-backdrop {
+    display: none;
 }
 
+.search-header-row {
+    width: 100%;
+    max-width: 800px;
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Hide the small "search" title if we want a cleaner look, 
+   but prompt asked for "Close (X) button on the top-right" */
 .search-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-matte-black);
-    text-transform: lowercase;
-    letter-spacing: 0px;
-    margin: 0;
+    display: none;
+    /* Minimalist: hide title, just input */
 }
 
 .close-search {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    font-size: 1.5rem;
-    color: #999;
+    position: fixed;
+    /* Fixed to viewport */
+    top: 30px;
+    right: 30px;
+    font-size: 2.5rem;
+    /* Larger for better hit area */
+    color: #555;
     background: none;
     border: none;
     cursor: pointer;
-    line-height: 1;
-    padding: 5px;
-    transition: color 0.2s;
+    padding: 10px;
+    z-index: 3001;
+    transition: color 0.2s, transform 0.2s;
 }
 
 .close-search:hover {
-    color: var(--color-matte-black);
+    color: #000;
+    transform: rotate(90deg);
+    /* Nice interaction */
 }
 
 .search-body {
-    flex: 1;
-    overflow-y: auto;
+    width: 100%;
+    max-width: 800px;
+    /* Centered content width */
     display: flex;
     flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .search-input-wrapper {
-    margin-bottom: 15px;
+    width: 100%;
+    margin-bottom: 40px;
 }
 
 #overlay-search-input {
     width: 100%;
-    padding: 16px 20px;
-    font-size: 1rem;
-    border: 1px solid #E5E5E5;
-    border-radius: 6px;
-    background: white;
+    padding: 20px 0;
+    font-size: 2rem;
+    /* Large text */
+    border: none;
+    border-bottom: 2px solid #E5E5E5;
+    background: transparent;
     font-family: 'Inter', sans-serif;
     color: var(--color-matte-black);
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: left;
+    /* Or center? usually left for typing */
+    transition: border-color 0.3s;
 }
 
 #overlay-search-input:focus {
-    border-color: #d1d1d1;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border-color: var(--color-matte-black);
 }
 
 #overlay-search-input::placeholder {
-    color: #bbb;
+    color: #ccc;
+    font-weight: 300;
 }
 
 .search-count {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #888;
     margin-bottom: 20px;
-    padding-left: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .search-divider {
-    border: 0;
-    border-top: 1px solid #EAEAEA;
-    margin-bottom: 25px;
+    display: none;
+    /* Remove divider line */
 }
 
 .search-results-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    padding-bottom: 40px;
 }
 
 /* LIST ITEM STYLE */
 .search-item-row {
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 15px;
     border-radius: 8px;
     transition: background 0.2s;
     cursor: pointer;
-    background: transparent;
-    text-decoration: none; /* In case we use <a> tags */
+    background: white;
+    /* Card style or transparent? Prompt: "Neutral background". Let's use white rows. */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .search-item-row:hover {
-    background: white;
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
 }
 
 .search-thumb {
-    width: 60px;
-    height: 75px;
+    width: 70px;
+    height: 70px;
     object-fit: contain;
-    background: white; 
-    margin-right: 20px;
+    background: #fdfdfd;
+    margin-right: 25px;
     border-radius: 4px;
-    border: 1px solid #f0f0f0;
 }
 
 .search-item-info {
@@ -1806,17 +1809,24 @@ button {
 .search-item-title {
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     color: var(--color-matte-black);
     letter-spacing: 0.5px;
     margin: 0;
-    line-height: 1.4;
 }
 
 @media (max-width: 600px) {
     .search-overlay {
-        width: 100%;
-        padding: 25px;
+        padding: 40px 20px;
+    }
+
+    #overlay-search-input {
+        font-size: 1.5rem;
+    }
+
+    .close-search {
+        top: -30px;
+        right: -10px;
     }
 }
