@@ -391,27 +391,6 @@ button {
     font-weight: 600;
 }
 
-/* SEARCH RESULTS OVERLAY (Optional if used) */
-.search-results-overlay {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: white;
-    border: 1px solid #eee;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
-    margin-top: 10px;
-    padding: 10px 0;
-    z-index: 200;
-    max-height: 400px;
-    overflow-y: auto;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-}
-
 /* LIST VIEW MODE (For Search Results) */
 .product-grid.list-view {
     grid-template-columns: 1fr;

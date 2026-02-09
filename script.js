@@ -584,117 +584,109 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 5. RENDER INITIAL GRID
                     renderGrid(shopGrid, currentCategoryProducts);
 
-                    // 6. SEARCH LOGIC
-                    const searchInput = document.getElementById('product-search');
-                    const noResultsArea = document.getElementById('no-results-area');
+                    /* -------------------------------------------------------------------------- */
+                    /*                             SEARCH OVERLAY LOGIC                           */
+                    /* -------------------------------------------------------------------------- */
+                    const searchTrigger = document.getElementById('search-trigger');
+                    const searchOverlay = document.getElementById('search-overlay');
+                    const closeSearchBtn = document.getElementById('close-search');
+                    const overlaySearchInput = document.getElementById('overlay-search-input');
+                    const resultsContainer = document.getElementById('search-results-container');
+                    const searchCountMsg = document.getElementById('search-count-msg');
 
-                    // Category Keyword Mapping
-                    const CATEGORY_KEYWORDS = {
-                        'fnd': 'skin', // Foundation
-                        'skin': 'skin',
-                        'piel': 'skin',
-                        'base': 'skin',
-                        'lip': 'lips',
-                        'labio': 'lips',
-                        'boca': 'lips',
-                        'face': 'face',
-                        'rostro': 'face',
-                        'cara': 'face',
-                        'set': 'sets',
-                        'kit': 'sets',
-                        'rutina': 'sets'
-                    };
+                    // Open Overlay
+                    if (searchTrigger && searchOverlay) {
+                        searchTrigger.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            searchOverlay.classList.add('active');
+                            if (overlaySearchInput) overlaySearchInput.focus();
+                        });
+                    }
 
+                    // Close Overlay
+                    function closeSearch() {
+                        if (searchOverlay) searchOverlay.classList.remove('active');
+                    }
+
+                    if (closeSearchBtn) {
+                        closeSearchBtn.addEventListener('click', closeSearch);
+                    }
+
+                    // Perform Search
                     function performSearch(query) {
                         query = query.toLowerCase().trim();
 
-                        // 1. Check for Direct Category Match
+                        if (!query) {
+                            if (resultsContainer) resultsContainer.innerHTML = '';
+                            if (searchCountMsg) searchCountMsg.innerText = '';
+                            return;
+                        }
+
+                        // Category Keyword Mapping
+                        const CATEGORY_KEYWORDS = {
+                            'fnd': 'skin',
+                            'skin': 'skin', 'piel': 'skin', 'base': 'skin',
+                            'lip': 'lips', 'labio': 'lips', 'boca': 'lips',
+                            'face': 'face', 'rostro': 'face', 'cara': 'face',
+                            'set': 'sets', 'kit': 'sets', 'rutina': 'sets'
+                        };
+
                         let matchedCategory = null;
                         for (const [key, val] of Object.entries(CATEGORY_KEYWORDS)) {
-                            if (query.includes(key)) {
-                                matchedCategory = val;
-                                break;
-                            }
+                            if (query.includes(key)) matchedCategory = val;
                         }
 
+                        let searchResults = [];
                         if (matchedCategory) {
-                            // Switch to Category View (Grid Mode)
-                            shopGrid.classList.remove('list-view');
-                            const catProducts = products.filter(p => p.category === matchedCategory);
-
-                            // Update Titles
-                            if (pageTitle) pageTitle.innerText = TITLES[matchedCategory].title;
-                            if (pageSubtitle) pageSubtitle.innerText = TITLES[matchedCategory].subtitle;
-
-                            renderGrid(shopGrid, catProducts);
-                            shopGrid.style.display = 'grid';
-                            if (noResultsArea) noResultsArea.style.display = 'none';
-                            return;
-                        }
-
-                        // 2. Text Search (List Mode)
-                        if (!query) {
-                            shopGrid.classList.remove('list-view');
-                            // Reset to original category
-                            const originCat = new URLSearchParams(window.location.search).get('cat') || 'all';
-                            const originProducts = originCat === 'all' ? products : products.filter(p => p.category === originCat);
-                            const originInfo = TITLES[originCat] || TITLES['all'];
-
-                            if (pageTitle) pageTitle.innerText = originInfo.title;
-                            if (pageSubtitle) pageSubtitle.innerText = originInfo.subtitle;
-
-                            renderGrid(shopGrid, originProducts);
-                            shopGrid.style.display = 'grid';
-                            if (noResultsArea) noResultsArea.style.display = 'none';
-                            return;
-                        }
-
-                        const searchResults = products.filter(p =>
-                            p.title.toLowerCase().includes(query) ||
-                            p.desc.toLowerCase().includes(query) ||
-                            p.category.toLowerCase().includes(query) ||
-                            (p.badge && p.badge.toLowerCase().includes(query))
-                        );
-
-                        if (searchResults.length > 0) {
-                            // Enable List View
-                            shopGrid.classList.add('list-view');
-
-                            // Update Title
-                            if (pageTitle) pageTitle.innerText = `Resultados`;
-                            if (pageSubtitle) pageSubtitle.innerText = `${searchResults.length} encontrado(s) para "${query}"`;
-
-                            renderGrid(shopGrid, searchResults);
-                            // Add list-mode class to cards
-                            Array.from(shopGrid.children).forEach(card => card.classList.add('list-mode'));
-
-                            shopGrid.style.display = 'grid';
-                            if (noResultsArea) noResultsArea.style.display = 'none';
+                            searchResults = products.filter(p => p.category === matchedCategory);
                         } else {
-                            shopGrid.style.display = 'none';
-                            if (noResultsArea) noResultsArea.style.display = 'block';
-                            if (pageTitle) pageTitle.innerText = `Sin Resultados`;
-                            if (pageSubtitle) pageSubtitle.innerText = `Intenta con otra palabra`;
+                            searchResults = products.filter(p =>
+                                p.title.toLowerCase().includes(query) ||
+                                p.desc.toLowerCase().includes(query) ||
+                                p.category.toLowerCase().includes(query)
+                            );
+                        }
+
+                        // Render Logic
+                        if (resultsContainer && searchCountMsg) {
+                            searchCountMsg.innerText = `${searchResults.length} results for '${query}'`;
+                            resultsContainer.innerHTML = '';
+
+                            if (searchResults.length === 0) {
+                                resultsContainer.innerHTML = '<p style="text-align:center; color:#999; margin-top:30px;">No results found.</p>';
+                                // Could show suggestion form here if desired, but keeping it clean for now as per minimal prompt
+                            } else {
+                                searchResults.forEach(p => {
+                                    const row = document.createElement('div');
+                                    row.classList.add('search-item-row');
+                                    row.innerHTML = `
+                                        <img src="${p.imageMain}" alt="${p.title}" class="search-thumb">
+                                        <div class="search-item-info">
+                                            <h4 class="search-item-title">${p.title}</h4>
+                                        </div>
+                                    `;
+                                    // Click to view product details (uses existing modal logic)
+                                    row.addEventListener('click', () => {
+                                        openProductModal(p);
+                                        closeSearch(); // Close search overlay when product modal opens
+                                    });
+                                    resultsContainer.appendChild(row);
+                                });
+                            }
                         }
                     }
 
-                    if (searchInput) {
+                    if (overlaySearchInput) {
                         let debounceTimeout;
-                        searchInput.addEventListener('input', (e) => {
+                        overlaySearchInput.addEventListener('input', (e) => {
                             clearTimeout(debounceTimeout);
                             debounceTimeout = setTimeout(() => {
                                 performSearch(e.target.value);
-                            }, 300); // Debounce for performance
-                        });
-
-                        // Also trigger on Enter
-                        searchInput.addEventListener('keypress', (e) => {
-                            if (e.key === 'Enter') {
-                                clearTimeout(debounceTimeout);
-                                performSearch(e.target.value);
-                            }
+                            }, 300);
                         });
                     }
+
+                    /* END SEARCH OVERLAY LOGIC */
 
                     // 7. SUGGESTION FORM LOGIC
                     const suggestionForm = document.getElementById('suggestion-form');
