@@ -412,11 +412,13 @@ button {
     left: -5%;
     width: 110%;
     height: 110%;
-    object-fit: cover;
-    /* Back to cover to fill the space better */
+    object-fit: contain;
+    /* Changed back to contain to ensure full product visibility while background is removed */
     transition: opacity 0.6s ease;
+    filter: brightness(1.15) contrast(1.15);
+    /* Tech to remove gray backgrounds */
     mix-blend-mode: multiply;
-    /* Keep removing white backgrounds */
+    /* Tech to remove white backgrounds */
 }
 
 /* Hover Zoom REMOVED - Static Image Swap */
