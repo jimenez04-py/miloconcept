@@ -1,3 +1,7 @@
+/**
+ * Milo Concept - Version 2.1.0
+ * Last Updated: 2026-02-09 19:55
+ */
 document.addEventListener('DOMContentLoaded', () => {
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
