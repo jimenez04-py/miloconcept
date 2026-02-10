@@ -132,7 +132,15 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Gestión de Productos</h1>
-            <p>Agrega productos a la tienda sin código.</p>
+            <div>
+                <button onclick="exportProducts()"
+                    style="padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; margin-right: 10px;">Exportar
+                    JSON</button>
+                <button onclick="document.getElementById('import-file').click()"
+                    style="padding: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;">Importar
+                    JSON</button>
+                <input type="file" id="import-file" style="display: none;" onchange="importProducts(this)">
+            </div>
         </div>
 
         <div class="admin-card">
@@ -454,6 +462,60 @@
 
         loadProducts();
         loadSuggestions();
+
+        // EXPORT PRODUCTS
+        async function exportProducts() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const products = await res.json();
+                const json = JSON.stringify(products, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'products_backup.json';
+                a.click();
+            } catch (e) {
+                alert('Error exportando: ' + e.message);
+            }
+        }
+
+        // IMPORT PRODUCTS
+        function importProducts(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const products = JSON.parse(e.target.result);
+                    if (!Array.isArray(products)) throw new Error("JSON inválido");
+
+                    if (!confirm(`Se importarán ${products.length} productos. ¿Confirmar?`)) return;
+
+                    let successCount = 0;
+                    for (const p of products) {
+                        try {
+                            // Clean up ID before import to allow fresh insert
+                            const { id, ...newProduct } = p;
+                            const res = await fetch(`${API_URL}/products`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(newProduct)
+                            });
+                            if (res.ok) successCount++;
+                        } catch (err) {
+                            console.error("Error importando producto:", p.title);
+                        }
+                    }
+                    alert(`Importación completada: ${successCount} productos agregados.`);
+                    loadProducts();
+                } catch (err) {
+                    alert('Error al leer archivo: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
     </script>
 </body>
 
