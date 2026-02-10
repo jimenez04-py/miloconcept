@@ -827,14 +827,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.init_point) {
                         window.location.href = data.init_point;
                     } else {
-                        alert("Error al iniciar el pago: No se recibió enlace de pago.");
+                        alert("Error: No se recibió enlace de pago.");
                     }
                 } else {
-                    alert("Error del servidor al procesar el pago.");
+                    const errorText = await response.text();
+                    console.error("Server Error:", response.status, errorText);
+                    alert(`Error del servidor (${response.status}): ${errorText}`);
                 }
             } catch (error) {
                 console.error("Error checkout:", error);
-                alert("Error de conexión. Asegúrate de que el servidor esté corriendo.");
+                alert(`Error de conexión: ${error.message}\nVerifica que estés en http://localhost:3001 (no un archivo) y que el servidor esté activo.`);
             } finally {
                 if (btnText) btnText.innerText = "Continuar";
             }
