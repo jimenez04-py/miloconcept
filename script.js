@@ -1204,13 +1204,10 @@ document.addEventListener('DOMContentLoaded', () => {
             /*                               HOME PAGE LOGIC                              */
             /* -------------------------------------------------------------------------- */
             if (homeGrid) {
-                let displayItems = products.filter(p => p.badge && (p.badge.includes('Best Seller') || p.badge.includes('Viral') || p.badge.includes('Trending')));
+                // Modified: Only show products with "Best Seller" badge as requested by user
+                let displayItems = products.filter(p => p.badge && p.badge.includes('Best Seller'));
 
-                // Fallback: If no best sellers, show the 8 most recent products
-                if (displayItems.length === 0) {
-                    displayItems = [...products].reverse().slice(0, 8);
-                }
-
+                // NO fallback: If no best sellers, show nothing or "No products found" via renderGrid
                 renderGrid(homeGrid, displayItems);
             }
         }
