@@ -415,8 +415,6 @@ button {
     object-fit: contain;
     /* Changed back to contain to ensure full product visibility while background is removed */
     transition: opacity 0.6s ease;
-    filter: brightness(1.15) contrast(1.15);
-    /* Tech to remove gray backgrounds */
     mix-blend-mode: multiply;
     /* Tech to remove white backgrounds */
 }
