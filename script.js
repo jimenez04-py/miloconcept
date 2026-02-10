@@ -1204,8 +1204,14 @@ document.addEventListener('DOMContentLoaded', () => {
             /*                               HOME PAGE LOGIC                              */
             /* -------------------------------------------------------------------------- */
             if (homeGrid) {
-                const bestSellers = products.filter(p => p.badge && p.badge.includes('Best Seller') || p.badge.includes('Viral'));
-                renderGrid(homeGrid, bestSellers);
+                let displayItems = products.filter(p => p.badge && (p.badge.includes('Best Seller') || p.badge.includes('Viral') || p.badge.includes('Trending')));
+
+                // Fallback: If no best sellers, show the 8 most recent products
+                if (displayItems.length === 0) {
+                    displayItems = [...products].reverse().slice(0, 8);
+                }
+
+                renderGrid(homeGrid, displayItems);
             }
         }
 
