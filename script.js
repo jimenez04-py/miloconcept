@@ -3,6 +3,7 @@
  * Last Updated: 2026-02-09 19:55
  */
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Milo Script Loaded v6 - Real Checkout Enabled");
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
     const heroSection = document.querySelector('.hero');
