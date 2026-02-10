@@ -1,5 +1,7 @@
 node_modules/
-.env
 .DS_Store
 *.log
-database.sqlite-journal
+database.sqlite
+*.zip
+dump_*.js
+*.json

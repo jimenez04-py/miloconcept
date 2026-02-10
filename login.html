@@ -57,24 +57,14 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            try {
-                const res = await fetch(`/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-
-                if (res.ok) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    window.location.href = 'index.html'; // Changed to index.html
-                } else {
-                    alert(data.error);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Falló el inicio de sesión');
+            // MOCK LOGIN
+            if (email && password) {
+                // Simulate success
+                localStorage.setItem('token', 'mock-token-123');
+                localStorage.setItem('user', JSON.stringify({ name: email.split('@')[0], email: email }));
+                window.location.href = 'index.html';
+            } else {
+                alert('Por favor llena todos los campos.');
             }
         });
     </script>

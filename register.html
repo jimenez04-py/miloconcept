@@ -60,25 +60,14 @@
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
 
-            try {
-                const res = await fetch(`/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
-                const data = await res.json();
-
-                if (res.ok) {
-                    alert('¡Registro exitoso! Por favor inicia sesión.');
-                    window.location.href = 'login.html';
-                } else {
-                    alert(data.error);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Falló el registro');
+            // MOCK REGISTER
+            if (name && email) {
+                alert('¡Registro exitoso (Simulado)! Por favor inicia sesión.');
+                // Normally we would POST /register, but for static deploy just redirect
+                window.location.href = 'login.html';
+            } else {
+                alert('Por favor llena todos los campos.');
             }
         });
     </script>
