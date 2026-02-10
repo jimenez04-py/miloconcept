@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /*                                SHOP PAGE LOGIC                             */
     /* -------------------------------------------------------------------------- */
 
-    const products = [
+    let products = [
         {
             "id": 1,
             "title": "LIP TINT - RASPBERRY JELLY",
@@ -1253,6 +1253,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // DYNAMIC PRODUCT SYNC
+        // This ensures products added via Admin Panel show up automatically
+        const syncProducts = async () => {
+            try {
+                const res = await fetch('/products');
+                if (res.ok) {
+                    const dbProducts = await res.json();
+                    if (dbProducts && dbProducts.length > 0) {
+                        const CAT_MAP = { 'lips': 'Labios', 'face': 'Rostro', 'skin': 'Piel', 'sets': 'Sets' };
+                        products = dbProducts.map(p => ({
+                            ...p,
+                            category: CAT_MAP[p.category] || p.category,
+                            brand: p.brand || (p.title.toLowerCase().includes('rhode') ? 'Rhode' : 'Milo Concept'),
+                            variants: typeof p.variants === 'string' ? p.variants : JSON.stringify(p.variants || [])
+                        }));
+                        renderPage(); // Update UI with DB items
+                    }
+                }
+            } catch (e) {
+                console.log("Static mode: Using bundled products.");
+            }
+        };
+
+        syncProducts();
         renderPage();
     }
 
