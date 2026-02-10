@@ -814,11 +814,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        items: cart.map(item => ({
-                            title: item.title,
-                            quantity: item.quantity,
-                            unit_price: parseFloat(item.price.replace(/[^0-9.]/g, '')) // ensure float
-                        }))
+                        items: cart.map(item => {
+                            let price = 0;
+                            if (item.unit_price !== undefined) {
+                                price = Number(item.unit_price);
+                            } else if (item.price !== undefined) {
+                                const pStr = String(item.price);
+                                price = parseFloat(pStr.replace(/[^0-9.]/g, ''));
+                            }
+                            return {
+                                title: item.title,
+                                quantity: Number(item.quantity || 1),
+                                unit_price: price,
+                                currency_id: 'MXN'
+                            };
+                        })
                     }),
                 });
 
