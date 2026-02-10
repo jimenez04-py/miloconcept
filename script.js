@@ -793,15 +793,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Checkout Logic (MOCKED)
+    // Checkout Logic (REAL)
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', (e) => {
+        checkoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             if (cart.length === 0) {
                 alert("Tu carrito está vacío.");
                 return;
             }
-            alert("Esta es una versión DEMO estática. El checkout real requiere un servidor Node.js.");
+
+            const btnText = checkoutBtn.querySelector('span:first-child');
+            if (btnText) btnText.innerText = "Procesando...";
+
+            try {
+                const response = await fetch('/create_preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        items: cart.map(item => ({
+                            title: item.title,
+                            quantity: item.quantity,
+                            unit_price: parseFloat(item.price.replace(/[^0-9.]/g, '')) // ensure float
+                        }))
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.init_point) {
+                        window.location.href = data.init_point;
+                    } else {
+                        alert("Error al iniciar el pago: No se recibió enlace de pago.");
+                    }
+                } else {
+                    alert("Error del servidor al procesar el pago.");
+                }
+            } catch (error) {
+                console.error("Error checkout:", error);
+                alert("Error de conexión. Asegúrate de que el servidor esté corriendo.");
+            } finally {
+                if (btnText) btnText.innerText = "Continuar";
+            }
         });
     }
 

@@ -215,7 +215,7 @@ app.post('/create_preference', async (req, res) => {
 
         const preference = new Preference(client);
         const result = await preference.create({ body });
-        res.json({ id: result.id });
+        res.json({ id: result.id, init_point: result.init_point });
 
     } catch (error) {
         console.error("Error creating preference:", error);
