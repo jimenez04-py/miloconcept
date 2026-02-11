@@ -3,7 +3,7 @@
  * Last Updated: 2026-02-09 19:55
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Milo Script Loaded v9 - PRODUCTION PUSH FORCE");
+    console.log("Milo Script Loaded v10 - Modal Price Fix");
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
     const heroSection = document.querySelector('.hero');
@@ -179,6 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDesc.innerText = desc;
         modalPrice.innerText = price;
         modalImg.src = imgSrc;
+
+        // FIX: Update Button Text and Reset Style
+        const modalAddBtn = document.querySelector('.modal-add-btn');
+        if (modalAddBtn) {
+            modalAddBtn.innerText = `AGREGAR AL CARRITO — ${price}`;
+            modalAddBtn.style.background = "#353535";
+            modalAddBtn.style.color = "#fff";
+            modalAddBtn.disabled = false;
+        }
 
 
         swatchesContainer.innerHTML = '';
