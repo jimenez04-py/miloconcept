@@ -3,7 +3,7 @@
  * Last Updated: 2026-02-09 19:55
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Milo Script Loaded v8 - Production Ready");
+    console.log("Milo Script Loaded v9 - PRODUCTION PUSH FORCE");
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
     const heroSection = document.querySelector('.hero');
