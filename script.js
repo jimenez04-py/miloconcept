@@ -3,7 +3,7 @@
  * Last Updated: 2026-02-09 19:55
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Milo Script Loaded v7 - Checkout Fix Applied");
+    console.log("Milo Script Loaded v8 - Production Ready");
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
     const heroSection = document.querySelector('.hero');
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    const mp = new MercadoPago('TEST-0649a58d-0c1a-40ae-b4ab-01eb99caccf6', {
+    const mp = new MercadoPago('APP_USR-29b6c907-0bf8-482b-8d23-59ef542ea5c2', {
         locale: 'es-MX'
     });
 
