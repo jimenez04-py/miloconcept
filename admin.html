@@ -140,6 +140,9 @@
                     style="padding: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;">Importar
                     JSON</button>
                 <input type="file" id="import-file" style="display: none;" onchange="importProducts(this)">
+                <button onclick="removeDuplicates()"
+                    style="padding: 10px; cursor: pointer; background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 10px;">Eliminar
+                    Duplicados</button>
             </div>
         </div>
 
@@ -515,6 +518,48 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        // REMOVE DUPLICATES
+        async function removeDuplicates() {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const products = await res.json();
+
+                const seenTitles = new Set();
+                const duplicates = [];
+
+                // Identify duplicates (keep ONLY the first one seen)
+                // Assuming fetched list is ordered by ID (usually ASC in SQL)
+                // So we keep the oldest (lower ID)
+                products.forEach(p => {
+                    const normalizedTitle = p.title.trim().toLowerCase();
+                    if (seenTitles.has(normalizedTitle)) {
+                        duplicates.push(p);
+                    } else {
+                        seenTitles.add(normalizedTitle);
+                    }
+                });
+
+                if (duplicates.length === 0) {
+                    alert('No se encontraron duplicados.');
+                    return;
+                }
+
+                if (!confirm(`Se encontraron ${duplicates.length} productos duplicados. ¿Deseas eliminarlos?`)) return;
+
+                let deletedCount = 0;
+                for (const p of duplicates) {
+                    await fetch(`${API_URL}/products/${p.id}`, { method: 'DELETE' });
+                    deletedCount++;
+                }
+
+                alert(`Se eliminaron ${deletedCount} duplicados.`);
+                loadProducts();
+
+            } catch (e) {
+                alert('Error eliminando duplicados: ' + e.message);
+            }
         }
     </script>
 </body>
