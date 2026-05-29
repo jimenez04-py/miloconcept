@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Cuenta | Milo Concept</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body { background: #FAFAFA; }
+        .account-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 140px 24px 80px;
+        }
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 48px;
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .account-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 2.6rem;
+            margin: 0;
+        }
+        .account-user { color: #555; font-size: 0.95rem; margin-top: 4px; }
+        .logout-btn {
+            background: none;
+            border: 1px solid #353535;
+            padding: 10px 24px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .logout-btn:hover { background: #353535; color: #fff; }
+
+        .section-title {
+            font-size: 0.75rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .orders-list { display: flex; flex-direction: column; gap: 16px; }
+
+        .order-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.03);
+            border: 1px solid #ececec;
+        }
+        .order-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .order-id { font-weight: 600; font-size: 0.95rem; }
+        .order-date { font-size: 0.8rem; color: #888; }
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .status-paid { background: #e8f5e9; color: #2e7d32; }
+        .status-pending { background: #fff8e1; color: #b8740c; }
+
+        .order-items { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
+        .order-items li { list-style: none; padding: 4px 0; }
+
+        .order-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 14px;
+        }
+        .order-total { font-weight: 600; font-size: 1.05rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 4px;
+            color: #888;
+        }
+        .empty-state a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 14px 32px;
+            background: #353535;
+            color: #fff;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header header--scrolled" id="site-header">
+        <nav class="desktop-nav">
+            <a href="shop.html" class="nav-link">Tienda</a>
+            <a href="shop.html?cat=skin" class="nav-link">Piel</a>
+            <a href="shop.html?cat=lips" class="nav-link">Labios</a>
+        </nav>
+        <div class="logo">
+            <a href="index.html"><span class="logo-text">Milo Concept</span></a>
+        </div>
+        <nav class="desktop-nav">
+            <a href="about.html" class="nav-link">Nosotros</a>
+            <a href="account.html" class="nav-link">Cuenta</a>
+        </nav>
+    </header>
+
+    <main class="account-page">
+        <div class="account-header">
+            <div>
+                <h1 class="account-title">Mi Cuenta</h1>
+                <p class="account-user" id="user-info">Cargando...</p>
+            </div>
+            <button class="logout-btn" id="logout-btn">Cerrar Sesión</button>
+        </div>
+
+        <!-- Tarjeta de modo administrador (solo visible para admins) -->
+        <div id="admin-card-slot"></div>
+
+        <div class="section-title">Historial de Pedidos</div>
+        <div id="orders-container">
+            <p style="color: #888;">Cargando pedidos...</p>
+        </div>
+    </main>
+
+    <script>
+        (async function () {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('user-info').textContent = `${user.name} · ${user.email}`;
+
+            // Tarjeta destacada de "modo administrador" — solo para admins
+            if (user.is_admin) {
+                document.getElementById('admin-card-slot').innerHTML = `
+                    <div class="admin-card">
+                        <div class="admin-card__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l2.39 4.84L20 7.6l-3.85 3.75.91 5.31L12 14.77 6.94 16.66l.91-5.31L4 7.6l5.61-.76L12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="admin-card__body">
+                            <h3 class="admin-card__title">Modo administrador</h3>
+                            <p class="admin-card__sub">Gestiona productos, inventario y revisa los pedidos recibidos.</p>
+                        </div>
+                        <a href="admin.html" class="admin-card__cta">Abrir panel</a>
+                    </div>
+                `;
+            }
+
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            });
+
+            const container = document.getElementById('orders-container');
+
+            try {
+                const res = await fetch('/my-orders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const orders = await res.json();
+                if (!Array.isArray(orders) || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>Aún no has hecho ningún pedido.</p>
+                            <a href="shop.html">Explorar Tienda</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `<ul class="orders-list">${orders.map(o => {
+                    const date = new Date(o.created_at).toLocaleDateString('es-MX', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                    });
+                    const statusClass = o.status === 'paid' ? 'status-paid' : 'status-pending';
+                    const statusLabel = o.status === 'paid' ? 'Pagado' : (o.status || 'Pendiente');
+                    const itemsHtml = (o.items || []).map(it =>
+                        `<li>${it.quantity} × ${escapeHtml(it.title)} — $${Number(it.unit_price).toFixed(2)}</li>`
+                    ).join('');
+                    return `
+                        <li class="order-card">
+                            <div class="order-head">
+                                <div>
+                                    <div class="order-id">Pedido #${o.id}</div>
+                                    <div class="order-date">${date}</div>
+                                </div>
+                                <span class="order-status ${statusClass}">${statusLabel}</span>
+                            </div>
+                            <ul class="order-items">${itemsHtml}</ul>
+                            <div class="order-foot">
+                                <span style="font-size: 0.85rem; color: #888;">${(o.items || []).length} artículo(s)</span>
+                                <span class="order-total">$${Number(o.total).toFixed(2)} MXN</span>
+                            </div>
+                        </li>
+                    `;
+                }).join('')}</ul>`;
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="empty-state"><p>No pudimos cargar tus pedidos. Intenta de nuevo más tarde.</p></div>`;
+            }
+        })();
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago pendiente | Milo Concept</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body { background: #FAFAFA; }
+        .status-page {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .status-card {
+            background: #fff;
+            padding: 60px 40px;
+            max-width: 520px;
+            width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.04);
+        }
+        .status-icon { font-size: 3rem; margin-bottom: 24px; color: #f59e0b; }
+        .status-card h1 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+        .status-card p { color: #555; margin-bottom: 12px; }
+        .status-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .btn-outline, .btn-solid {
+            display: inline-block;
+            padding: 14px 32px;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .btn-solid { background: #353535; color: #fff; }
+        .btn-solid:hover { background: #000; }
+        .btn-outline { border: 1px solid #353535; color: #353535; }
+        .btn-outline:hover { background: #353535; color: #fff; }
+    </style>
+</head>
+
+<body>
+    <main class="status-page">
+        <div class="status-card">
+            <div class="status-icon">⏳</div>
+            <h1>Pago en proceso</h1>
+            <p>Tu pago está siendo verificado. Esto puede tardar unos minutos.</p>
+            <p>Te enviaremos un correo en cuanto se confirme y podrás ver el estado en "Mis Pedidos".</p>
+            <div class="status-actions">
+                <a href="index.html" class="btn-outline">Inicio</a>
+                <a href="account.html" class="btn-solid">Mis Pedidos</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | Milo Concept</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            padding-top: 100px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .btn-submit {
+            background: #353535;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #000;
+        }
+
+        .product-list {
+            margin-top: 50px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .product-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 4px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .btn-delete {
+            color: red;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            background: none;
+        }
+
+        /* --- Sección de Pedidos --- */
+        .orders-section {
+            margin-top: 60px;
+        }
+
+        .order-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .order-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #eee;
+        }
+
+        .order-card .placeholder-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .order-card .order-info h3 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+        }
+
+        .order-card .order-info p {
+            margin: 3px 0;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .order-card .order-info .meta {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-card .order-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #353535;
+            text-align: right;
+        }
+
+        .order-card .order-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .order-status.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .shipping-block {
+            background: #f9f9f9;
+            border-left: 3px solid #353535;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .shipping-block strong {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <span class="logo-text">Milo Concept</span>
+        </div>
+        <nav class="desktop-nav">
+            <a href="index.html" class="nav-link">Inicio</a>
+            <a href="#" class="nav-link"
+                onclick="localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload();">Cerrar
+                Sesión</a>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Gestión de Productos</h1>
+            <p>Agrega productos a la tienda sin código.</p>
+        </div>
+
+        <div class="admin-card">
+            <h2>Agregar Nuevo Producto</h2>
+            <form id="product-form">
+                <div class="form-grid">
+                    <div>
+                        <label>Título del Producto</label>
+                        <input type="text" id="p-title" required placeholder="ej. Base de Seda">
+                    </div>
+                    <div>
+                        <label>Precio</label>
+                        <input type="text" id="p-price" required placeholder="ej. $850.00">
+                    </div>
+
+                    <div class="full-width">
+                        <label>Descripción</label>
+                        <textarea id="p-desc" rows="3" placeholder="Descripción corta"></textarea>
+                    </div>
+
+                    <div>
+                        <label>Categoría</label>
+                        <select id="p-category">
+                            <option value="skin">Piel</option>
+                            <option value="lips">Labios</option>
+                            <option value="face">Rostro</option>
+                            <option value="sets">Sets</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Etiqueta</label>
+                        <select id="p-badge">
+                            <option value="">Ninguna</option>
+                            <option value="Best Seller">Más Vendido</option>
+                            <option value="Limited Edition">Edición Limitada</option>
+                            <option value="Trending">Tendencia</option>
+                            <option value="Exclusive">Exclusivo</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>URL Imagen Principal</label>
+                        <input type="text" id="p-img-main" required placeholder="https://...">
+                    </div>
+                    <div>
+                        <label>URL Imagen Hover</label>
+                        <input type="text" id="p-img-hover" required placeholder="https://...">
+                    </div>
+
+                    <div>
+                        <label>Calificación (1-5)</label>
+                        <input type="number" id="p-rating" step="0.1" value="5.0">
+                    </div>
+                    <div>
+                        <label>Número de Reseñas</label>
+                        <input type="number" id="p-reviews" value="100">
+                    </div>
+
+                    <div class="full-width">
+                        <label style="margin-top: 20px; font-size: 1.1rem;">Tonos / Variantes del Producto</label>
+                        <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">Agrega diferentes colores o
+                            estilos
+                            para este producto. Cada tono puede tener su propia imagen.</p>
+
+                        <div id="variants-container">
+                            <!-- Variant rows will be added here -->
+                        </div>
+
+                        <button type="button" onclick="addVariantRow()"
+                            style="background: #eee; border: 1px dashed #999; padding: 10px; width: 100%; cursor: pointer; margin-top: 10px; font-weight: 600;">+
+                            Agregar Nuevo Tono</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 30px;">Agregar Producto</button>
+            </form>
+        </div>
+
+        <div class="product-list">
+            <h2>Productos Existentes</h2>
+            <div id="product-list-container">
+                <!-- Loaded via JS -->
+                <p>Cargando...</p>
+            </div>
+        </div>
+
+        <!-- Sección de Pedidos -->
+        <div class="orders-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Pedidos Recibidos</h2>
+                <button onclick="loadOrders()"
+                    style="background: #eee; border: 1px solid #ccc; padding: 8px 16px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-weight: 600;">
+                    Refrescar
+                </button>
+            </div>
+            <div id="orders-container">
+                <p>Cargando pedidos...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = `http://${window.location.hostname || 'localhost'}:3001`;
+
+        // Guard de cliente: bloquear acceso si no es admin (el backend igualmente valida)
+        (function adminGuard() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (!user.is_admin) {
+                alert('Esta sección es solo para administradores.');
+                window.location.href = 'account.html';
+                return;
+            }
+        })();
+
+        let editingProductId = null;
+
+        function addVariantRow(data = null) {
+            const container = document.getElementById('variants-container');
+            const row = document.createElement('div');
+            row.className = 'variant-row';
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '1fr 1fr 1fr auto';
+            row.style.gap = '10px';
+            row.style.marginBottom = '10px';
+            row.style.padding = '15px';
+            row.style.background = '#f9f9f9';
+            row.style.border = '1px solid #eee';
+            row.style.borderRadius = '4px';
+
+            row.innerHTML = `
+                <div>
+                    <label>Nombre del Tono</label>
+                    <input type="text" class="v-name" placeholder="ej. Rosa Dulce" value="${data ? data.name : ''}">
+                </div>
+                <div>
+                    <label>Imagen del Producto (Tono)</label>
+                    <input type="text" class="v-image" placeholder="URL a imagen grande" value="${data ? data.image : ''}">
+                </div>
+                <div>
+                    <label>Muestra (Color/URL)</label>
+                    <input type="text" class="v-swatch" placeholder="Hex #000 o URL a img círculo" value="${data ? (data.hex || data.swatchImg || '') : ''}">
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer; font-size:1.5rem; padding-bottom:5px;">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        // Load Products
+        async function loadProducts() {
+            const container = document.getElementById('product-list-container');
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const products = await res.json();
+                window.allProducts = products; // Store for edit
+
+                if (products.length === 0) {
+                    container.innerHTML = '<p>No se encontraron productos.</p>';
+                    return;
+                }
+
+                container.innerHTML = products.map(p => `
+                    <div class="product-item">
+                        <img src="${p.imageMain}" alt="${p.title}">
+                        <div class="product-info">
+                            <strong>${p.title}</strong> 
+                            ${p.badge ? `<span style="background:#000; color:#fff; padding:2px 6px; font-size:10px; border-radius:4px; margin-left:5px;">${p.badge}</span>` : ''}
+                            <br>
+                            <small>${p.category} | ${p.price}</small>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-delete" style="color:blue;" onclick="editProduct(${p.id})">Editar</button>
+                            <button class="btn-delete" onclick="deleteProduct(${p.id})">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                const msg = `Error loading products: ${err.message}.`;
+                container.innerHTML = `<p style="color:red;">${msg}<br>Check console for more details.</p>`;
+            }
+        }
+
+        // Edit Product
+        function editProduct(id) {
+            const p = window.allProducts.find(x => x.id === id);
+            if (!p) return;
+
+            editingProductId = p.id;
+            document.getElementById('p-title').value = p.title;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-desc').value = p.desc;
+            document.getElementById('p-category').value = p.category;
+            document.getElementById('p-badge').value = p.badge || '';
+            document.getElementById('p-img-main').value = p.imageMain;
+            document.getElementById('p-img-hover').value = p.imageHover;
+            document.getElementById('p-rating').value = p.rating;
+            document.getElementById('p-reviews').value = p.reviews;
+
+            // Load Variants
+            document.getElementById('variants-container').innerHTML = '';
+            if (p.variants) {
+                try {
+                    const variants = JSON.parse(p.variants);
+                    variants.forEach(v => addVariantRow(v));
+                } catch (e) { console.error("Error parsing variants", e); }
+            }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = "Actualizar Producto";
+            btn.style.backgroundColor = "#007bff";
+
+            // Scroll to form
+            document.querySelector('.admin-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Add/Update Product Handler
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const product = {
+                title: document.getElementById('p-title').value,
+                price: document.getElementById('p-price').value,
+                desc: document.getElementById('p-desc').value,
+                category: document.getElementById('p-category').value,
+                badge: document.getElementById('p-badge').value,
+                imageMain: document.getElementById('p-img-main').value,
+                imageHover: document.getElementById('p-img-hover').value,
+                rating: document.getElementById('p-rating').value,
+                reviews: document.getElementById('p-reviews').value
+            };
+
+            // Collect Variants
+            const variantRows = document.querySelectorAll('.variant-row');
+            const variants = [];
+            variantRows.forEach(row => {
+                const name = row.querySelector('.v-name').value;
+                const image = row.querySelector('.v-image').value;
+                const swatch = row.querySelector('.v-swatch').value;
+                if (name && image) {
+                    const v = { name, image };
+                    if (swatch.startsWith('#') || swatch.length < 10) {
+                        v.hex = swatch;
+                    } else {
+                        v.swatchImg = swatch;
+                    }
+                    variants.push(v);
+                }
+            });
+            product.variants = JSON.stringify(variants);
+
+            try {
+                const token = localStorage.getItem('token');
+                const authHeaders = {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                };
+                let res;
+                if (editingProductId) {
+                    // UPDATE
+                    res = await fetch(`${API_URL}/products/${editingProductId}`, {
+                        method: 'PUT',
+                        headers: authHeaders,
+                        body: JSON.stringify(product)
+                    });
+                } else {
+                    // CREATE
+                    res = await fetch(`${API_URL}/products`, {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: JSON.stringify(product)
+                    });
+                }
+
+                if (res.ok) {
+                    alert(editingProductId ? '¡Producto Actualizado!' : '¡Producto Agregado!');
+                    document.getElementById('product-form').reset();
+                    document.getElementById('variants-container').innerHTML = '';
+                    editingProductId = null;
+                    document.querySelector('.btn-submit').innerText = "Agregar Producto";
+                    document.querySelector('.btn-submit').style.backgroundColor = "#353535";
+                    loadProducts();
+                } else {
+                    let errorMessage;
+                    try {
+                        const data = await res.json();
+                        errorMessage = data.error;
+                    } catch (e) {
+                        const text = await res.text();
+                        // Preview first 50 chars of text to avoid huge HTML
+                        errorMessage = `Status ${res.status} ${res.statusText}: ${text.substring(0, 50)}...`;
+                    }
+                    alert('Error al guardar producto: ' + errorMessage);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Client/Network Error: ' + err.message);
+            }
+        });
+
+        // Delete Product
+        async function deleteProduct(id) {
+            if (!confirm('¿Estás seguro?')) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/products/${id}`, {
+                    method: 'DELETE',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (res.ok) loadProducts();
+                else {
+                    const data = await res.json().catch(() => ({}));
+                    alert('Error al borrar: ' + (data.error || res.status));
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // ---------------------------------------------------------------- //
+        //   PEDIDOS
+        // ---------------------------------------------------------------- //
+        function formatDate(s) {
+            try {
+                const d = new Date(s);
+                return d.toLocaleString('es-MX', {
+                    day: '2-digit', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            } catch { return s; }
+        }
+
+        function renderShipping(shipping) {
+            if (!shipping) {
+                return '<div class="shipping-block" style="color:#999;"><strong>Envío</strong>Sin dirección registrada</div>';
+            }
+            const parts = [];
+            if (shipping.street) parts.push(shipping.street);
+            if (shipping.colony) parts.push('Col. ' + shipping.colony);
+            const cityLine = [shipping.city, shipping.state, shipping.zip ? 'CP ' + shipping.zip : ''].filter(Boolean).join(', ');
+            if (cityLine) parts.push(cityLine);
+            const phone = shipping.phone ? `Tel: ${shipping.phone}` : '';
+
+            return `
+                <div class="shipping-block">
+                    <strong>Enviar a</strong>
+                    ${parts.map(p => `<div>${p}</div>`).join('')}
+                    ${phone ? `<div style="margin-top:4px; color:#666;">${phone}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function renderItemsSummary(items) {
+            if (!Array.isArray(items) || items.length === 0) return '<p>Sin artículos</p>';
+            return items.map(it => `
+                <p>• ${it.title} × ${it.quantity} <span style="color:#888;">($${Number(it.unit_price || 0).toFixed(2)} c/u)</span></p>
+            `).join('');
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '<p>Cargando pedidos...</p>';
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                container.innerHTML = '<p style="color:red;">Necesitas iniciar sesión como administrador.</p>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    container.innerHTML = `<p style="color:red;">Error: ${data.error || res.status}</p>`;
+                    return;
+                }
+
+                const orders = await res.json();
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = '<p>Aún no hay pedidos registrados.</p>';
+                    return;
+                }
+
+                container.innerHTML = orders.map(o => {
+                    const imgHtml = o.primary_image
+                        ? `<img src="${o.primary_image}" alt="Producto">`
+                        : `<div class="placeholder-img">Sin<br>imagen</div>`;
+
+                    const customerName = o.user_name || (o.shipping_address && o.shipping_address.name) || 'Invitado';
+                    const statusClass = o.status === 'paid' ? 'paid' : 'pending';
+
+                    return `
+                        <div class="order-card">
+                            ${imgHtml}
+                            <div class="order-info">
+                                <h3>Pedido #${o.id}</h3>
+                                <p class="meta">${formatDate(o.created_at)}</p>
+                                <p><strong>Cliente:</strong> ${customerName} ${o.email ? `(${o.email})` : ''}</p>
+                                ${renderItemsSummary(o.items)}
+                                ${renderShipping(o.shipping_address)}
+                            </div>
+                            <div class="order-total">
+                                $${Number(o.total || 0).toFixed(2)}
+                                <br>
+                                <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color:red;">Error al cargar pedidos: ${err.message}</p>`;
+            }
+        }
+
+        loadProducts();
+        loadOrders();
+    </script>
+</body>
+
+</html>
