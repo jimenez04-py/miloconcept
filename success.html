@@ -24,8 +24,9 @@
             padding: 60px 40px;
             max-width: 520px;
             width: 100%;
-            border-radius: 4px;
-            box-shadow: 0 2px 24px rgba(0,0,0,0.04);
+            border-radius: 14px;
+            border-top: 3px solid #C9A86A;
+            box-shadow: 0 26px 70px rgba(45, 35, 25, 0.10);
         }
         .status-icon {
             font-size: 3rem;
@@ -133,14 +134,18 @@
                 `;
             };
 
+            const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+
             const renderSuccess = (order) => {
                 clearCart();
                 spinner.remove();
                 card.innerHTML = `
                     <div class="status-icon ok">✓</div>
                     <h1>¡Gracias por tu compra!</h1>
-                    <p>Tu pedido <strong>#${order.id}</strong> ha sido confirmado.</p>
-                    <p>Te enviamos el recibo a <strong>${order.email || 'tu correo'}</strong>.</p>
+                    <p>Tu pedido <strong>#${Number(order.id) || ''}</strong> ha sido confirmado.</p>
+                    <p>Te enviamos el recibo a <strong>${esc(order.email || 'tu correo')}</strong>.</p>
                     <p class="meta">Total: $${Number(order.total).toFixed(2)} MXN</p>
                     <div class="status-actions">
                         <a href="shop.html" class="btn-outline">Seguir Comprando</a>

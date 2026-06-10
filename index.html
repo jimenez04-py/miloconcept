@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concept Milo | Belleza Refinada</title>
+    <title>Milo Concept | Belleza Refinada</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
@@ -66,7 +66,7 @@
             <a href="login.html" class="mobile-nav-link">Cuenta</a>
         </nav>
         <div class="mobile-menu-footer">
-            <p>&copy; 2024 Concept Milo</p>
+            <p>&copy; 2026 Milo Concept</p>
         </div>
     </div>
 
@@ -83,50 +83,39 @@
             <div class="cart-items">
                 <p class="empty-msg">Tu carrito está vacío.</p>
             </div>
-        </div>
 
-        <div class="cart-footer">
-            <!-- Address Form -->
-            <div class="address-form" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
-                <p
-                    style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600;">
-                    Detalles de Envío</p>
+            <!-- Detalles de envío: se desplazan junto con los productos -->
+            <div class="address-form">
+                <p class="address-form__title">Detalles de Envío</p>
 
-                <!-- Region Selector (Keep this for cost calculation) -->
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label
-                        style="display: block; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; color: #888;">Estado
-                        / Región *</label>
-                    <select id="shipping-state" onchange="calculateShipping()"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; font-family: 'Inter', sans-serif; font-size: 13px; background: white;">
+                <div class="form-group">
+                    <label class="field-label">Estado / Región *</label>
+                    <select id="shipping-state" onchange="calculateShipping()">
                         <option value="" disabled selected>Seleccionar Región</option>
-                        <option value="Tabasco">Mexico/Villahermosa (Envio Gratis)</option>
+                        <option value="Tabasco">México/Villahermosa (Envío Gratis)</option>
                         <option value="Monterrey">Centro - $150</option>
                         <option value="Puebla">Lugares seleccionados - $200</option>
                         <option value="General">A todo México - $230</option>
                     </select>
                 </div>
 
-                <!-- Specific Address Fields -->
-                <div class="form-group" style="margin-bottom: 10px;">
-                    <input type="text" id="addr-street" placeholder="Calle y Número *"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                <div class="form-group">
+                    <input type="text" id="addr-street" placeholder="Calle y Número *">
                 </div>
 
-                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="addr-colony" placeholder="Colonia *"
-                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
-                    <input type="text" id="addr-zip" placeholder="Código Postal *"
-                        style="width: 80px; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                <div class="form-row">
+                    <input type="text" id="addr-colony" placeholder="Colonia *">
+                    <input type="text" id="addr-zip" placeholder="C.P. *" class="field-zip">
                 </div>
 
-                <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="addr-city" placeholder="Ciudad *"
-                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
-                    <input type="tel" id="addr-phone" placeholder="Teléfono *"
-                        style="flex: 1; padding: 10px; border: 1px solid #ddd; font-size: 13px;">
+                <div class="form-row">
+                    <input type="text" id="addr-city" placeholder="Ciudad *">
+                    <input type="tel" id="addr-phone" placeholder="Teléfono *">
                 </div>
             </div>
+        </div>
+
+        <div class="cart-footer">
             <div class="subtotal-row">
                 <span>Subtotal</span>
                 <span id="cart-subtotal">$0.00</span>
@@ -151,6 +140,7 @@
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
+            <span class="hero-eyebrow">Belleza Refinada</span>
             <h1>Milo Concept</h1>
             <p>Tus productos favoritos, a tu alcance y a mejor precio.</p>
             <a href="shop.html" class="btn-primary">Ver la Colección</a>
@@ -213,7 +203,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Concept Milo. Todos los derechos reservados.</p>
+            <p>&copy; 2026 Milo Concept. Todos los derechos reservados.</p>
             <div class="socials">
                 <a href="#">IG</a>
                 <a href="#">TT</a>

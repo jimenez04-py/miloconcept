@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -7,9 +7,10 @@
     <title>Nosotros | Milo Concept</title>
     <link rel="stylesheet" href="style.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
         rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/png" href="images/product_foundation_1765314926411.png">
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
         .about-page {
             /* Milo Concept soft palette */
@@ -111,7 +112,7 @@
         </nav>
 
         <!-- Mobile Cart Icon -->
-        <div class="cart-icon mobile-only" id="mobile-cart-trigger">Carrito (0)</div>
+        <div class="cart-icon mobile-only" id="cart-trigger-mobile">Carrito (0)</div>
     </header>
 
     <!-- Mobile Menu -->
@@ -134,22 +135,61 @@
         </div>
     </div>
 
-    <!-- Cart Drawer -->
+    <!-- Cart Drawer (estructura estándar — script.js lo controla) -->
     <div class="cart-overlay" id="cart-overlay"></div>
     <div class="cart-drawer" id="cart-drawer">
-        <button class="close-cart-btn" id="close-cart-btn">&times;</button>
         <div class="cart-header-tabs">
-            <button class="tab-btn active">Tu Carrito</button>
+            <button class="tab-btn" onclick="window.location.href='login.html'">Cuenta</button>
+            <button class="tab-btn active" id="cart-tab-trigger">Carrito (0)</button>
+            <button class="close-cart-btn" id="close-cart">&times;</button>
         </div>
-        <div class="cart-items-container" id="cart-items-container">
-            <p class="empty-msg">Tu carrito está vacío.</p>
+
+        <div class="cart-items-container">
+            <div class="cart-items">
+                <p class="empty-msg">Tu carrito está vacío.</p>
+            </div>
+
+            <!-- Detalles de envío: se desplazan junto con los productos -->
+            <div class="address-form">
+                <p class="address-form__title">Detalles de Envío</p>
+                <div class="form-group">
+                    <label class="field-label">Estado / Región *</label>
+                    <select id="shipping-state" onchange="calculateShipping()">
+                        <option value="" disabled selected>Seleccionar Región</option>
+                        <option value="Tabasco">México/Villahermosa (Envío Gratis)</option>
+                        <option value="Monterrey">Centro - $150</option>
+                        <option value="Puebla">Lugares seleccionados - $200</option>
+                        <option value="General">A todo México - $230</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="addr-street" placeholder="Calle y Número *">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="addr-colony" placeholder="Colonia *">
+                    <input type="text" id="addr-zip" placeholder="C.P. *" class="field-zip">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="addr-city" placeholder="Ciudad *">
+                    <input type="tel" id="addr-phone" placeholder="Teléfono *">
+                </div>
+            </div>
         </div>
+
         <div class="cart-footer">
             <div class="subtotal-row">
                 <span>Subtotal</span>
                 <span id="cart-subtotal">$0.00</span>
             </div>
-            <button class="checkout-btn" onclick="checkout()">Pagar</button>
+            <div class="subtotal-row shipping-row">
+                <span>Envío</span>
+                <span id="cart-shipping">Gratis</span>
+            </div>
+            <p class="shipping-note">Envío e impuestos calculados al finalizar.</p>
+            <button class="checkout-btn">
+                <span>Continuar</span>
+                <span id="btn-total">$0.00</span>
+            </button>
         </div>
     </div>
 

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro | Concept Milo</title>
+    <title>Registro | Milo Concept</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
@@ -63,7 +63,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                const res = await fetch(`http://${window.location.hostname || 'localhost'}:3001/register`, {
+                const res = await fetch('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })

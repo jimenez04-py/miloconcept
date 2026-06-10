@@ -1784,19 +1784,6 @@ body.has-announcement .header {
     }
 }
 
-/* reuse existing + auth styles */
-@import url('style.css');
-/* Assuming this works or copy relevant parts if not */
-
-/* Since we are not using SASS/imports properly in basic css without build tool, 
-   I will just add the Auth styles here. Ideally this should be appended to style.css 
-   but for now I'm creating the structure in the html files to link style.css 
-   and I will APPEND these styles to style.css using another tool call later 
-   or just assume style.css handles the basics.
-   
-   Actually, let's just Append this to style.css now.
-*/
-
 /* Mobile Menu Drawer */
 .mobile-menu-drawer {
     position: fixed;
@@ -2166,4 +2153,351 @@ body.has-announcement .header {
         text-align: center;
         padding: 24px 20px;
     }
+}
+
+/* ============================================================== */
+/*  REDISEÑO 2026 — capa de refinamiento (conserva la marca)      */
+/*  Tokens ampliados + pulido de componentes y microinteracciones */
+/* ============================================================== */
+
+:root {
+    --gold: #C9A86A;
+    --gold-deep: #B8893F;
+    --ink: #2A2A2A;
+    --hairline: #EAE6E0;            /* línea cálida sutil */
+    --surface: #F6F4F0;             /* fondo neutro cálido */
+    --shadow-sm: 0 2px 10px rgba(45, 35, 25, 0.05);
+    --shadow-md: 0 14px 38px rgba(45, 35, 25, 0.08);
+    --shadow-lg: 0 26px 70px rgba(45, 35, 25, 0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- Base global ---- */
+html { scroll-behavior: smooth; }
+
+::selection {
+    background: var(--gold);
+    color: #fff;
+}
+
+/* Accesibilidad: foco visible y consistente */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.swatch:focus-visible {
+    outline: 2px solid var(--gold-deep);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Scrollbar discreto y on-brand */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #d8d2c8 transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+    background: #d8d2c8;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: #c4bdb0; background-clip: content-box; }
+
+/* ---- Announcement bar: leve degradado cálido ---- */
+.announcement-bar {
+    background: linear-gradient(90deg, #f1ede7 0%, #f6efe6 50%, #f1ede7 100%);
+    border-bottom: 1px solid rgba(201, 168, 106, 0.18);
+}
+
+/* ---- Header / Nav ---- */
+.logo-text { transition: letter-spacing 0.4s var(--ease-out), color 0.4s ease; }
+.header--scrolled .logo:hover .logo-text { letter-spacing: 1.5px; }
+
+/* Subrayado de nav en dorado */
+.nav-link::after { height: 1.5px; background-color: var(--gold-deep) !important; }
+.header--on-hero .nav-link::after { background-color: var(--gold-deep) !important; }
+
+/* Scrim sutil arriba del hero para legibilidad del texto oscuro del header */
+.header--on-hero::before {
+    content: '';
+    position: absolute;
+    inset: -42px 0 auto 0;
+    height: 160px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Chip del carrito */
+.cart-icon {
+    transition: color 0.3s ease, transform 0.3s var(--ease-out);
+}
+.cart-icon:hover { color: var(--gold-deep); }
+
+/* ---- Hero: ken-burns sutil + entrada del eyebrow ---- */
+.hero-image-container .parallax-img {
+    animation: kenburns 22s var(--ease-out) infinite alternate;
+}
+@keyframes kenburns {
+    from { transform: scale(1); }
+    to   { transform: scale(1.08); }
+}
+.hero-eyebrow { color: var(--gold-deep); }
+.hero-content h1 {
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 30px rgba(255, 255, 255, 0.6);
+}
+.btn-primary {
+    backdrop-filter: blur(2px);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Indicador de scroll en el hero */
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 26px;
+    left: 50%;
+    width: 1px;
+    height: 46px;
+    background: linear-gradient(var(--color-matte-black), transparent);
+    transform: translateX(-50%);
+    opacity: 0.5;
+    animation: scrollCue 2.2s ease-in-out infinite;
+}
+@keyframes scrollCue {
+    0%, 100% { transform: translateX(-50%) scaleY(0.6); opacity: 0.2; }
+    50%      { transform: translateX(-50%) scaleY(1);   opacity: 0.6; }
+}
+
+/* ---- Section header: filete decorativo ---- */
+.section-header h2 { position: relative; display: inline-block; }
+.section-header h2::after {
+    content: '';
+    display: block;
+    width: 46px;
+    height: 2px;
+    margin: 14px auto 0;
+    background: var(--gold);
+    border-radius: 2px;
+}
+
+/* ---- Product cards: elevación + zoom de imagen + estrellas doradas ---- */
+.product-card {
+    transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out);
+    will-change: transform;
+}
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+}
+.card-image-area { border-radius: var(--radius-sm); }
+.product-img { transition: opacity 0.6s ease, transform 1.2s var(--ease-out); }
+.product-card:hover .product-img { transform: scale(1.04); }
+.pill-badge {
+    background: rgba(201, 168, 106, 0.12);
+    border-color: var(--gold);
+    color: var(--gold-deep);
+}
+.rating .stars { color: var(--gold); letter-spacing: 1px; }
+.add-to-cart-btn {
+    transition: background 0.3s ease, transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+}
+.add-to-cart-btn:hover {
+    background: var(--ink);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+}
+
+/* ---- Cart drawer: formulario de envío estilizado ---- */
+.address-form {
+    margin-top: 24px;
+    border-top: 1px solid var(--hairline);
+    padding-top: 22px;
+}
+.address-form__title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 700;
+    color: var(--color-matte-black);
+}
+.field-label {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    color: #999;
+    font-weight: 600;
+}
+.address-form .form-group { margin-bottom: 12px; }
+.address-form .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.address-form input,
+.address-form select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    background: #fff;
+    color: var(--color-text-dark);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.address-form input::placeholder { color: #bbb; }
+.address-form input:focus,
+.address-form select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.14);
+}
+.address-form .field-zip { flex: 0 0 96px; }
+.address-form select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23999' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+}
+
+/* ---- Cart items: título, variante y stepper de cantidad ---- */
+.cart-item {
+    border-radius: var(--radius-sm);
+    position: relative;
+    transition: box-shadow 0.3s ease;
+}
+.cart-item:hover { box-shadow: var(--shadow-sm); }
+.cart-item-info h4 {
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: var(--color-matte-black);
+    line-height: 1.3;
+}
+.cart-item-variant {
+    font-size: 0.78rem;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+}
+.cart-item-price { font-weight: 600; font-size: 0.92rem; }
+.qty-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 4px 10px;
+    width: fit-content;
+}
+.qty-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-matte-black);
+    background: transparent;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.qty-btn:hover { background: var(--color-matte-black); color: #fff; }
+.qty-value { font-size: 0.85rem; font-weight: 600; min-width: 14px; text-align: center; }
+.remove-item {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #c9c2b6;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.remove-item:hover { color: #c0392b; transform: scale(1.1); }
+
+/* Subtotal / envío: alinear a los lados (más legible que centrado) */
+.subtotal-row {
+    justify-content: space-between;
+    font-size: 0.95rem;
+}
+.subtotal-row span:last-child { font-weight: 600; }
+#cart-shipping { color: var(--gold-deep); }
+.checkout-btn {
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+    transition: background 0.3s ease, transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+}
+.checkout-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* ---- Modal: estado "Agregado" ---- */
+.modal-add-btn {
+    transition: background 0.3s ease, transform 0.2s var(--ease-out);
+    border-radius: 999px;
+}
+.modal-add-btn.is-added {
+    background: #1f7a44 !important;
+    color: #fff !important;
+}
+
+/* ---- Auth pages: fondo degradado + filete dorado superior ---- */
+.auth-page {
+    background:
+        radial-gradient(1200px 500px at 50% -10%, #fff 0%, var(--surface) 60%),
+        var(--surface);
+}
+.auth-box {
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.auth-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-deep), var(--gold));
+}
+.auth-box .logo-text { font-size: 2rem; }
+.auth-btn { transition: all 0.4s var(--ease-out); }
+.auth-btn:hover { background: var(--ink); box-shadow: var(--shadow-md); }
+
+/* ---- Footer: acentos dorados ---- */
+.footer-col h4 { position: relative; padding-bottom: 8px; }
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 22px; height: 2px;
+    background: var(--gold);
+}
+.footer-col a:hover { color: var(--gold-deep); padding-left: 3px; }
+.input-group { border-bottom-color: var(--color-matte-black); }
+.input-group button { transition: color 0.25s ease, transform 0.25s var(--ease-out); }
+.input-group button:hover { color: var(--gold-deep); transform: translateX(3px); }
+.socials a:hover { color: var(--gold-deep); }
+
+/* ---- Respeta usuarios que prefieren menos movimiento ---- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+    .hero-image-container .parallax-img { animation: none; }
+    .hero::after { display: none; }
 }

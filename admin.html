@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -335,7 +335,33 @@
     </div>
 
     <script>
-        const API_URL = `http://${window.location.hostname || 'localhost'}:3001`;
+        // Same-origin: el servidor sirve estos HTML, así que usamos rutas relativas.
+        // Evita romper en producción (HTTPS) y elimina el contenido mixto.
+        const API_URL = '';
+
+        // Escapa HTML para evitar XSS almacenado: la dirección y nombre del cliente
+        // los escribe el comprador y se muestran aquí con la sesión del admin.
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">' +
+            '<rect width="100%" height="100%" fill="#F0EBE3"/>' +
+            '<text x="50%" y="52%" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700" fill="#C9A86A" text-anchor="middle" letter-spacing="2">MILO</text>' +
+            '</svg>'
+        );
+        function attachImgFallback(scope) {
+            if (!scope) return;
+            scope.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', function onErr() {
+                    img.removeEventListener('error', onErr);
+                    img.src = PLACEHOLDER_IMG;
+                });
+            });
+        }
 
         // Guard de cliente: bloquear acceso si no es admin (el backend igualmente valida)
         (function adminGuard() {
@@ -402,12 +428,12 @@
 
                 container.innerHTML = products.map(p => `
                     <div class="product-item">
-                        <img src="${p.imageMain}" alt="${p.title}">
+                        <img src="${escapeHtml(p.imageMain)}" alt="${escapeHtml(p.title)}">
                         <div class="product-info">
-                            <strong>${p.title}</strong> 
-                            ${p.badge ? `<span style="background:#000; color:#fff; padding:2px 6px; font-size:10px; border-radius:4px; margin-left:5px;">${p.badge}</span>` : ''}
+                            <strong>${escapeHtml(p.title)}</strong>
+                            ${p.badge ? `<span style="background:#000; color:#fff; padding:2px 6px; font-size:10px; border-radius:4px; margin-left:5px;">${escapeHtml(p.badge)}</span>` : ''}
                             <br>
-                            <small>${p.category} | ${p.price}</small>
+                            <small>${escapeHtml(p.category)} | ${escapeHtml(p.price)}</small>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="btn-delete" style="color:blue;" onclick="editProduct(${p.id})">Editar</button>
@@ -415,6 +441,7 @@
                         </div>
                     </div>
                 `).join('');
+                attachImgFallback(container);
 
             } catch (err) {
                 console.error(err);
@@ -585,8 +612,8 @@
             return `
                 <div class="shipping-block">
                     <strong>Enviar a</strong>
-                    ${parts.map(p => `<div>${p}</div>`).join('')}
-                    ${phone ? `<div style="margin-top:4px; color:#666;">${phone}</div>` : ''}
+                    ${parts.map(p => `<div>${escapeHtml(p)}</div>`).join('')}
+                    ${phone ? `<div style="margin-top:4px; color:#666;">${escapeHtml(phone)}</div>` : ''}
                 </div>
             `;
         }
@@ -594,7 +621,7 @@
         function renderItemsSummary(items) {
             if (!Array.isArray(items) || items.length === 0) return '<p>Sin artículos</p>';
             return items.map(it => `
-                <p>• ${it.title} × ${it.quantity} <span style="color:#888;">($${Number(it.unit_price || 0).toFixed(2)} c/u)</span></p>
+                <p>• ${escapeHtml(it.title)} × ${Number(it.quantity) || 0} <span style="color:#888;">($${Number(it.unit_price || 0).toFixed(2)} c/u)</span></p>
             `).join('');
         }
 
@@ -628,7 +655,7 @@
 
                 container.innerHTML = orders.map(o => {
                     const imgHtml = o.primary_image
-                        ? `<img src="${o.primary_image}" alt="Producto">`
+                        ? `<img src="${escapeHtml(o.primary_image)}" alt="Producto">`
                         : `<div class="placeholder-img">Sin<br>imagen</div>`;
 
                     const customerName = o.user_name || (o.shipping_address && o.shipping_address.name) || 'Invitado';
@@ -638,20 +665,21 @@
                         <div class="order-card">
                             ${imgHtml}
                             <div class="order-info">
-                                <h3>Pedido #${o.id}</h3>
-                                <p class="meta">${formatDate(o.created_at)}</p>
-                                <p><strong>Cliente:</strong> ${customerName} ${o.email ? `(${o.email})` : ''}</p>
+                                <h3>Pedido #${Number(o.id) || ''}</h3>
+                                <p class="meta">${escapeHtml(formatDate(o.created_at))}</p>
+                                <p><strong>Cliente:</strong> ${escapeHtml(customerName)} ${o.email ? `(${escapeHtml(o.email)})` : ''}</p>
                                 ${renderItemsSummary(o.items)}
                                 ${renderShipping(o.shipping_address)}
                             </div>
                             <div class="order-total">
                                 $${Number(o.total || 0).toFixed(2)}
                                 <br>
-                                <span class="order-status ${statusClass}">${o.status || 'pending'}</span>
+                                <span class="order-status ${statusClass}">${escapeHtml(o.status || 'pending')}</span>
                             </div>
                         </div>
                     `;
                 }).join('');
+                attachImgFallback(container);
 
             } catch (err) {
                 console.error(err);

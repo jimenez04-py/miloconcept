@@ -1,3 +1,32 @@
+// Escapa HTML antes de inyectarlo con innerHTML. Evita XSS desde datos de
+// producto (que un admin edita) y desde el carrito.
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+// Placeholder de marca para imágenes que no cargan (muchas URLs externas
+// de catálogo están caídas o bloquean hotlinking).
+const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">' +
+    '<rect width="100%" height="100%" fill="#F0EBE3"/>' +
+    '<text x="50%" y="48%" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#C9A86A" text-anchor="middle" letter-spacing="3">MILO</text>' +
+    '<text x="50%" y="58%" font-family="Inter,Arial,sans-serif" font-size="11" fill="#b9b1a4" text-anchor="middle" letter-spacing="2">CONCEPT</text>' +
+    '</svg>'
+);
+
+// Sustituye una imagen rota por el placeholder (una sola vez).
+function attachImgFallback(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('img').forEach(img => {
+        img.addEventListener('error', function onErr() {
+            img.removeEventListener('error', onErr);
+            img.src = PLACEHOLDER_IMG;
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const parallaxImages = document.querySelectorAll('.parallax-img');
@@ -132,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </svg>
                 </div>
                 <div class="awt__body">
-                    <p class="awt__title">Hola de nuevo, ${firstName}</p>
+                    <p class="awt__title">Hola de nuevo, ${escapeHtml(firstName)}</p>
                     <p class="awt__sub">Tu panel te espera</p>
                 </div>
                 <a class="awt__cta" href="admin.html">Entrar</a>
@@ -233,8 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'default': []
     };
 
+    // Producto actualmente abierto en el modal (para conocer su id/precio al agregar).
+    let currentModalProduct = null;
+
     function openProductModal(productData) {
 
+        currentModalProduct = productData;
         const title = productData.title;
         const price = productData.price;
         const desc = productData.desc;
@@ -261,6 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitle.innerText = title;
         modalDesc.innerText = desc;
         modalPrice.innerText = price;
+        // Fallback persistente por si la imagen del producto/tono no carga.
+        modalImg.onerror = () => { if (modalImg.src !== PLACEHOLDER_IMG) modalImg.src = PLACEHOLDER_IMG; };
         modalImg.src = imgSrc;
 
 
@@ -375,22 +410,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const modalAddBtn = document.querySelector('.modal-add-btn');
     const cartItemsContainer = document.querySelector('.cart-items');
-    const emptyMsg = document.querySelector('.empty-msg');
-    const cartTotalEl = document.querySelector('.total span:last-child');
     const cartCountEls = document.querySelectorAll('.cart-icon, #cart-trigger, #cart-trigger-mobile');
 
-    let cartTotal = 0;
-    let cartCount = 0;
-
-
-    let cart = [];
     let currentShippingCost = 0; // Se actualiza según la región elegida
+
+    // ---------------------------------------------------------------- //
+    // ESTADO DEL CARRITO — persistente en localStorage, una sola fuente
+    // de verdad (el array `cart`). Funciona en todas las páginas.
+    // Cada item: { id, title, unit_price, image, color, quantity }
+    // ---------------------------------------------------------------- //
+    const loadCart = () => {
+        try {
+            const raw = JSON.parse(localStorage.getItem('cart') || '[]');
+            return Array.isArray(raw) ? raw.filter(i => i && i.title) : [];
+        } catch { return []; }
+    };
+    let cart = loadCart();
+    const saveCart = () => { try { localStorage.setItem('cart', JSON.stringify(cart)); } catch (_) {} };
+
+    const cartCount = () => cart.reduce((n, i) => n + (Number(i.quantity) || 0), 0);
+    const cartSubtotal = () => cart.reduce((s, i) => s + (Number(i.unit_price) || 0) * (Number(i.quantity) || 0), 0);
+
+    // "$1,200.00" → 1200  (tolera comas y símbolos)
+    const parsePrice = (raw) => {
+        const n = parseFloat(String(raw == null ? '' : raw).replace(/[^0-9.]/g, ''));
+        return isNaN(n) ? 0 : n;
+    };
+
+    function addToCart(item) {
+        const key = `${item.id}::${item.color || ''}`;
+        const existing = cart.find(i => `${i.id}::${i.color || ''}` === key);
+        if (existing) existing.quantity = Math.min(99, existing.quantity + (item.quantity || 1));
+        else cart.push({ ...item, quantity: item.quantity || 1 });
+        saveCart();
+        renderCart();
+    }
+    function removeFromCartAt(index) {
+        if (index >= 0 && index < cart.length) { cart.splice(index, 1); saveCart(); renderCart(); }
+    }
+    function setQtyAt(index, qty) {
+        if (index < 0 || index >= cart.length) return;
+        cart[index].quantity = Math.max(1, Math.min(99, parseInt(qty, 10) || 1));
+        saveCart();
+        renderCart();
+    }
 
     // ---------------------------------------------------------------- //
     // SHIPPING CALCULATOR (mini encuesta por región)
     // ---------------------------------------------------------------- //
-    // Tarifas fijas según el select #shipping-state.
-    // Si en el futuro cambian los precios, basta con editar este mapa.
     const SHIPPING_RATES = {
         'Tabasco': 0,       // Villahermosa: envío gratis
         'Monterrey': 150,   // Centro
@@ -401,147 +468,112 @@ document.addEventListener('DOMContentLoaded', () => {
     window.calculateShipping = function () {
         const select = document.getElementById('shipping-state');
         const value = select ? select.value : '';
-        currentShippingCost = SHIPPING_RATES.hasOwnProperty(value) ? SHIPPING_RATES[value] : 0;
-        updateCartUI();
+        currentShippingCost = Object.prototype.hasOwnProperty.call(SHIPPING_RATES, value) ? SHIPPING_RATES[value] : 0;
+        renderCart();
     };
 
+    // ---------------------------------------------------------------- //
+    // RENDER — reconstruye el carrito desde el estado
+    // ---------------------------------------------------------------- //
+    function renderCart() {
+        const count = cartCount();
+        const subtotal = cartSubtotal();
 
-    const mp = new MercadoPago('TEST-0649a58d-0c1a-40ae-b4ab-01eb99caccf6', {
-        locale: 'es-MX'
-    });
+        if (cartItemsContainer) {
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="empty-msg">Tu carrito está vacío.</p>';
+            } else {
+                cartItemsContainer.innerHTML = cart.map((item, i) => `
+                    <div class="cart-item">
+                        <div class="cart-item-img">
+                            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">
+                        </div>
+                        <div class="cart-item-info">
+                            <h4>${escapeHtml(item.title)}</h4>
+                            ${item.color ? `<span class="cart-item-variant">${escapeHtml(item.color)}</span>` : ''}
+                            <span class="cart-item-price">$${(Number(item.unit_price) || 0).toFixed(2)}</span>
+                            <div class="qty-control" data-index="${i}">
+                                <button type="button" class="qty-btn qty-minus" aria-label="Restar uno">−</button>
+                                <span class="qty-value">${item.quantity}</span>
+                                <button type="button" class="qty-btn qty-plus" aria-label="Sumar uno">+</button>
+                            </div>
+                        </div>
+                        <button class="remove-item" data-index="${i}" aria-label="Quitar del carrito">&times;</button>
+                    </div>
+                `).join('');
+
+                cartItemsContainer.querySelectorAll('.remove-item').forEach(btn =>
+                    btn.addEventListener('click', () => removeFromCartAt(Number(btn.dataset.index))));
+                cartItemsContainer.querySelectorAll('.qty-minus').forEach(btn => {
+                    const idx = Number(btn.closest('.qty-control').dataset.index);
+                    btn.addEventListener('click', () => setQtyAt(idx, cart[idx].quantity - 1));
+                });
+                cartItemsContainer.querySelectorAll('.qty-plus').forEach(btn => {
+                    const idx = Number(btn.closest('.qty-control').dataset.index);
+                    btn.addEventListener('click', () => setQtyAt(idx, cart[idx].quantity + 1));
+                });
+                attachImgFallback(cartItemsContainer);
+            }
+        }
+
+        const subtotalEl = document.getElementById('cart-subtotal');
+        if (subtotalEl) subtotalEl.innerText = '$' + subtotal.toFixed(2);
+
+        const shippingEl = document.getElementById('cart-shipping');
+        if (shippingEl) shippingEl.innerText = currentShippingCost === 0 ? 'Gratis' : '$' + currentShippingCost.toFixed(2);
+
+        cartCountEls.forEach(el => {
+            if ((el.id || '').includes('mobile')) el.innerText = `CARRITO (${count})`;
+            else el.innerText = `Carrito (${count})`;
+        });
+
+        const finalTotal = count > 0 ? subtotal + currentShippingCost : 0;
+        const btnTotalSpan = document.getElementById('btn-total');
+        if (btnTotalSpan) btnTotalSpan.innerText = '$' + finalTotal.toFixed(2);
+
+        const shippingRow = document.querySelector('.shipping-row');
+        if (shippingRow) shippingRow.style.display = count > 0 ? 'flex' : 'none';
+
+        // El formulario de envío solo tiene sentido con productos en el carrito.
+        const addressForm = document.querySelector('.address-form');
+        if (addressForm) addressForm.style.display = cart.length > 0 ? '' : 'none';
+    }
+
+    // Mercado Pago: la public key puede inyectarse en producción vía window.MP_PUBLIC_KEY.
+    // El SDK sólo está cargado en páginas con checkout (index/shop), por eso lo guardamos.
+    const MP_PUBLIC_KEY = window.MP_PUBLIC_KEY || 'TEST-0649a58d-0c1a-40ae-b4ab-01eb99caccf6';
+    const mp = (typeof MercadoPago !== 'undefined' && MP_PUBLIC_KEY)
+        ? new MercadoPago(MP_PUBLIC_KEY, { locale: 'es-MX' })
+        : null;
 
     if (modalAddBtn) {
         modalAddBtn.addEventListener('click', () => {
-
+            const p = currentModalProduct;
             const title = modalTitle.innerText;
-            const priceStr = modalPrice.innerText;
-            const price = parseFloat(priceStr.replace('$', ''));
+            const price = (p && p.price != null) ? parsePrice(p.price) : parsePrice(modalPrice.innerText);
             const image = modalImg.src;
-            const color = selectedColorName.innerText;
-
+            const hasColor = modalColorArea && modalColorArea.style.display !== 'none';
+            const color = hasColor ? selectedColorName.innerText : '';
+            const id = (p && p.id != null) ? p.id : null;
 
             const originalText = modalAddBtn.innerHTML;
-            modalAddBtn.innerText = "Agregado";
-            modalAddBtn.style.background = "#fff";
-            modalAddBtn.style.color = "#000";
+            modalAddBtn.innerText = 'Agregado ✓';
+            modalAddBtn.classList.add('is-added');
 
+            addToCart({ id, title, unit_price: price, image, color });
 
             setTimeout(() => {
-
-                if (emptyMsg) emptyMsg.style.display = 'none';
-                const itemDiv = document.createElement('div');
-                itemDiv.classList.add('cart-item');
-                itemDiv.innerHTML = `
-                    <div class="cart-item-img">
-                        <img src="${image}" alt="${title}">
-                    </div>
-                    <div class="cart-item-info">
-                        <h4>${title}</h4>
-                        <span class="cart-item-variant">${color}</span>
-                        <span class="cart-item-price">${priceStr}</span>
-                    </div>
-                    <button class="remove-item">&times;</button>
-                `;
-
-
-                itemDiv.style.display = "flex";
-                itemDiv.style.gap = "15px";
-                itemDiv.style.marginBottom = "20px";
-                itemDiv.style.alignItems = "center";
-
-                const imgEl = itemDiv.querySelector('img');
-
-                itemDiv.querySelector('.remove-item').addEventListener('click', () => {
-
-                    itemDiv.remove();
-
-                    const removeIndex = cart.findIndex(i => i.title === title && i.unit_price === price);
-                    if (removeIndex > -1) {
-                        cart.splice(removeIndex, 1);
-                    }
-
-                    cartTotal -= price;
-                    cartCount--;
-
-                    updateCartUI();
-                });
-
-                cartItemsContainer.appendChild(itemDiv);
-
-
-                cartTotal += price;
-                cartCount++;
-
-
-                cart.push({
-                    title: title,
-                    quantity: 1,
-                    unit_price: price,
-                    currency_id: 'MXN'
-                });
-
-
-                updateCartUI();
-
-
                 closeProductModal();
-                toggleCart();
-
-
-                setTimeout(() => {
-                    modalAddBtn.innerHTML = originalText;
-                    modalAddBtn.style.background = "";
-                    modalAddBtn.style.color = "";
-                }, 500);
-
-            }, 600);
+                if (cartDrawer) cartDrawer.classList.add('active');
+                if (cartOverlay) cartOverlay.classList.add('active');
+                modalAddBtn.innerHTML = originalText;
+                modalAddBtn.classList.remove('is-added');
+            }, 450);
         });
-
-        function updateCartUI() {
-
-            if (cartCount === 0) {
-                if (emptyMsg) emptyMsg.style.display = 'block';
-            } else {
-                if (emptyMsg) emptyMsg.style.display = 'none';
-            }
-
-
-            if (cartTotalEl) cartTotalEl.innerText = '$' + cartTotal.toFixed(2);
-
-
-            const subtotalEl = document.getElementById('cart-subtotal');
-            if (subtotalEl) subtotalEl.innerText = '$' + cartTotal.toFixed(2);
-
-            // Update Shipping Display
-            const shippingEl = document.getElementById('cart-shipping');
-            if (shippingEl) {
-                if (currentShippingCost === 0) {
-                    shippingEl.innerText = 'Gratis';
-                } else {
-                    shippingEl.innerText = '$' + currentShippingCost.toFixed(2);
-                }
-            }
-
-            cartCountEls.forEach(el => {
-                if (el.id.includes('mobile')) el.innerText = `CARRITO (${cartCount})`;
-                else el.innerText = `Carrito (${cartCount})`;
-            });
-
-            // If user hasn't selected shipping yet, we can default to 0 or prompt. 
-            // For now, let's just add whatever is current (0 if not selected)
-            // Or only add shipping if they picked something? 
-            // Let's assume 0 if unselected for pure UI, but maybe warn on checkout?
-
-            const finalTotal = cartCount > 0 ? (cartTotal + currentShippingCost) : 0;
-            const btnTotalSpan = document.getElementById('btn-total');
-            if (btnTotalSpan) btnTotalSpan.innerText = '$' + finalTotal.toFixed(2);
-
-            const shippingRow = document.querySelector('.shipping-row');
-            if (shippingRow) {
-                shippingRow.style.display = cartCount > 0 ? 'flex' : 'none';
-            }
-        }
     }
+
+    // Pinta el carrito al cargar: refleja lo persistido en cualquier página.
+    renderCart();
 
 
 
@@ -570,8 +602,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         async function fetchAndRenderProducts() {
             try {
-                // Fetch from Server
-                const response = await fetch(`http://${window.location.hostname || 'localhost'}:3001/products`);
+                // Fetch from Server (misma-origen: rutas relativas)
+                const response = await fetch('/products');
                 const products = await response.json();
 
                 if (!Array.isArray(products)) {
@@ -717,9 +749,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 console.error("Error fetching products:", error);
-                const msg = `No se pudieron cargar los productos. Error: ${error.message}.`;
-                if (shopGrid) shopGrid.innerHTML = `<p style="text-align:center; padding: 20px;">${msg}<br>Asegúrate de que el servidor esté corriendo en el puerto 3001.</p>`;
-                if (homeGrid) homeGrid.innerHTML = `<p style="text-align:center; padding: 20px;">${msg}<br>Asegúrate de que el servidor esté corriendo en el puerto 3001.</p>`;
+                const msg = 'No se pudieron cargar los productos. Intenta recargar la página en un momento.';
+                if (shopGrid) shopGrid.innerHTML = `<p style="text-align:center; padding: 40px 20px; color:#888;">${msg}</p>`;
+                if (homeGrid) homeGrid.innerHTML = `<p style="text-align:center; padding: 40px 20px; color:#888;">${msg}</p>`;
             }
         }
 
@@ -733,28 +765,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.classList.add('product-card');
                     card.classList.add('fade-in-scroll'); // Add animation class if on home
 
-                    // HTML Structure
+                    // HTML Structure (todos los campos escapados contra XSS)
                     card.innerHTML = `
                         <div class="card-header">
-                            <span class="big-cat-title">${product.category}</span>
-                            ${product.badge ? `<span class="pill-badge">${product.badge}</span>` : '<span></span>'}
+                            <span class="big-cat-title">${escapeHtml(product.category)}</span>
+                            ${product.badge ? `<span class="pill-badge">${escapeHtml(product.badge)}</span>` : '<span></span>'}
                         </div>
                         <div class="card-image-area">
-                            <img src="${product.imageMain}" alt="${product.title}" class="product-img main-img" style="${product.style || ''}">
-                            <img src="${product.imageHover}" alt="${product.title} swatch" class="product-img hover-img">
+                            <img src="${escapeHtml(product.imageMain)}" alt="${escapeHtml(product.title)}" class="product-img main-img" loading="lazy">
+                            <img src="${escapeHtml(product.imageHover)}" alt="${escapeHtml(product.title)} swatch" class="product-img hover-img" loading="lazy">
                         </div>
                         <div class="card-details">
                             <div class="rating">
-                                ★★★★★ <span class="count">(${product.reviews})</span>
+                                <span class="stars" aria-hidden="true">★★★★★</span> <span class="count">(${Number(product.reviews) || 0})</span>
                             </div>
                             <div class="title-row">
-                                <h3>${product.title}</h3>
-                                <span class="price">${product.price}</span>
+                                <h3>${escapeHtml(product.title)}</h3>
+                                <span class="price">${escapeHtml(product.price)}</span>
                             </div>
-                            <p class="desc">${product.desc}</p>
+                            <p class="desc">${escapeHtml(product.desc)}</p>
                             <button class="add-to-cart-btn">Comprar</button>
                         </div>
                     `;
+
+                    attachImgFallback(card);
 
                     const buyBtn = card.querySelector('.add-to-cart-btn');
                     buyBtn.addEventListener('click', (e) => {
@@ -779,6 +813,12 @@ document.addEventListener('DOMContentLoaded', () => {
         checkoutBtn.addEventListener('click', async () => {
             if (cart.length === 0) {
                 alert("¡Tu carrito está vacío!");
+                return;
+            }
+
+            // Si el SDK de Mercado Pago no cargó, no podemos abrir el checkout.
+            if (!mp) {
+                alert("El sistema de pago no está disponible en este momento. Vuelve a la Tienda para finalizar tu compra.");
                 return;
             }
 
@@ -818,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: ''
                 };
 
-                const response = await fetch(`http://${window.location.hostname || 'localhost'}:3001/create_preference`, {
+                const response = await fetch('/create_preference', {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

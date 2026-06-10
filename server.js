@@ -43,7 +43,33 @@ app.use(cors({ origin: corsOrigin }));
 // Webhook needs raw access to body for potential signature verification — mount BEFORE express.json
 // (we still parse JSON below for normal routes)
 app.use(express.json({ limit: '100kb' }));
-app.use(express.static(path.join(__dirname, '/'))); // Serve static files
+
+// --------------------------------------------------------------------------
+// STATIC FILE GUARD (defense in depth)
+// --------------------------------------------------------------------------
+// The static root is the project root, so without this guard server-side
+// source, the database, dependencies and receipts would be downloadable
+// (e.g. GET /database.sqlite, /server.js, /receipts/receipt_5.pdf).
+// We block them BEFORE express.static gets a chance to serve them.
+const BLOCKED_EXACT = new Set([
+    '/server.js', '/database.js', '/seed_products.js',
+    '/package.json', '/package-lock.json',
+]);
+app.use((req, res, next) => {
+    const p = req.path.toLowerCase();
+    const blocked =
+        BLOCKED_EXACT.has(p) ||
+        p.endsWith('.sqlite') || p.endsWith('.db') ||
+        p.endsWith('.env') || p.endsWith('.map') ||
+        p.startsWith('/node_modules') ||
+        p.startsWith('/receipts') ||
+        p.startsWith('/.');
+    if (blocked) return res.status(404).send('Not found');
+    next();
+});
+
+// Serve static files. dotfiles:'deny' is a second line of defense for .env/.git
+app.use(express.static(path.join(__dirname, '/'), { dotfiles: 'deny' }));
 
 const axios = require('axios'); // For MP API
 
@@ -221,7 +247,7 @@ app.post('/register', rateLimit({ windowMs: 60_000, max: 5 }), (req, res) => {
         return res.status(400).json({ error: 'Datos demasiado largos' });
     }
 
-    bcrypt.hash(password, 10, (err, hash) => {
+    bcrypt.hash(password, 12, (err, hash) => {
         if (err) return res.status(500).json({ error: 'Encryption error' });
 
         const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
@@ -676,7 +702,11 @@ app.get('/admin/orders', requireAdmin, (req, res) => {
 function generateReceiptPDF(orderId, user, items, total, callback) {
     const doc = new PDFDocument({ margin: 50 });
     const fileName = `receipt_${orderId}.pdf`;
-    const filePath = path.join(__dirname, 'images', fileName); // store in images temporarily
+    // Store receipts OUTSIDE the static root so they can't be downloaded by
+    // guessing sequential IDs (/receipts is also blocked by the guard above).
+    const receiptsDir = path.join(__dirname, 'receipts');
+    if (!fs.existsSync(receiptsDir)) fs.mkdirSync(receiptsDir, { recursive: true });
+    const filePath = path.join(receiptsDir, fileName);
     const stream = fs.createWriteStream(filePath);
 
     doc.pipe(stream);
