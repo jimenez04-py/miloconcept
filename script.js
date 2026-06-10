@@ -11,7 +11,7 @@ function escapeHtml(s) {
 const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">' +
     '<rect width="100%" height="100%" fill="#F0EBE3"/>' +
-    '<text x="50%" y="48%" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#C9A86A" text-anchor="middle" letter-spacing="3">MILO</text>' +
+    '<text x="50%" y="48%" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#353535" text-anchor="middle" letter-spacing="3">MILO</text>' +
     '<text x="50%" y="58%" font-family="Inter,Arial,sans-serif" font-size="11" fill="#b9b1a4" text-anchor="middle" letter-spacing="2">CONCEPT</text>' +
     '</svg>'
 );
