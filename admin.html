@@ -84,6 +84,43 @@
             margin-top: 50px;
         }
 
+        .list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .json-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .json-btn {
+            background: #fff;
+            border: 1px solid #353535;
+            color: #353535;
+            padding: 9px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: auto;
+            margin: 0;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .json-btn:hover {
+            background: #353535;
+            color: #fff;
+        }
+
         .product-item {
             display: flex;
             align-items: center;
@@ -312,7 +349,19 @@
         </div>
 
         <div class="product-list">
-            <h2>Productos Existentes</h2>
+            <div class="list-head">
+                <h2 style="margin:0;">Productos Existentes</h2>
+                <div class="json-actions">
+                    <button type="button" id="btn-export" class="json-btn">⬇ Exportar JSON</button>
+                    <label class="json-btn" for="import-file">⬆ Importar JSON</label>
+                    <input type="file" id="import-file" accept="application/json,.json" hidden>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; color:#888; margin:0 0 16px;">
+                Tu catálogo se respalda en <code>products.json</code> y se vuelve a cargar solo en cada despliegue —
+                ya no se borra al actualizar la página. Usa <strong>Exportar</strong> para descargar tu catálogo actual
+                cuando quieras guardar cambios en ese archivo.
+            </p>
             <div id="product-list-container">
                 <!-- Loaded via JS -->
                 <p>Cargando...</p>
@@ -686,6 +735,66 @@
                 container.innerHTML = `<p style="color:red;">Error al cargar pedidos: ${err.message}</p>`;
             }
         }
+
+        // ---------------------------------------------------------------- //
+        //   EXPORTAR / IMPORTAR CATÁLOGO (respaldo JSON)
+        // ---------------------------------------------------------------- //
+        document.getElementById('btn-export').addEventListener('click', async () => {
+            try {
+                const res = await fetch(`${API_URL}/products`);
+                const products = await res.json();
+                const blob = new Blob([JSON.stringify(products, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'products.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('No se pudo exportar: ' + e.message);
+            }
+        });
+
+        document.getElementById('import-file').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            let products;
+            try {
+                products = JSON.parse(await file.text());
+            } catch (err) {
+                alert('El archivo no es un JSON válido.');
+                e.target.value = '';
+                return;
+            }
+            if (!Array.isArray(products)) {
+                alert('El JSON debe ser una lista de productos.');
+                e.target.value = '';
+                return;
+            }
+            if (!confirm(`¿Importar ${products.length} productos? Se agregan los nuevos y se actualizan los existentes (por id). No se borra nada.`)) {
+                e.target.value = '';
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/admin/products/import`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+                    body: JSON.stringify(products)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`✅ Importados ${data.imported} productos.`);
+                    loadProducts();
+                } else {
+                    alert('Error: ' + (data.error || res.status));
+                }
+            } catch (err) {
+                alert('Error al importar: ' + err.message);
+            } finally {
+                e.target.value = '';
+            }
+        });
 
         loadProducts();
         loadOrders();

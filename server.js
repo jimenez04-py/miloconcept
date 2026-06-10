@@ -42,7 +42,7 @@ app.use(cors({ origin: corsOrigin }));
 
 // Webhook needs raw access to body for potential signature verification — mount BEFORE express.json
 // (we still parse JSON below for normal routes)
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '512kb' })); // holgado para importar el catálogo de productos
 
 // --------------------------------------------------------------------------
 // STATIC FILE GUARD (defense in depth)
@@ -226,6 +226,47 @@ app.delete('/products/:id', requireAdmin, (req, res) => {
     db.run(`DELETE FROM products WHERE id = ?`, [id], function (err) {
         if (err) return res.status(500).json({ error: 'Database error' });
         res.json({ message: 'Product deleted' });
+    });
+});
+
+// Bulk import de productos desde un JSON (solo admin).
+// Hace upsert por id: agrega los nuevos y actualiza los existentes, sin borrar
+// los que no vengan en el archivo. Es el respaldo products.json del panel.
+app.post('/admin/products/import', requireAdmin, (req, res) => {
+    const list = Array.isArray(req.body) ? req.body
+        : (Array.isArray(req.body.products) ? req.body.products : null);
+    if (!list) return res.status(400).json({ error: 'Formato inválido: se espera un arreglo de productos' });
+    if (list.length > 2000) return res.status(400).json({ error: 'Demasiados productos (máx. 2000)' });
+
+    const toCents = (raw) => {
+        const n = parseFloat(String(raw == null ? '' : raw).replace(/[^0-9.]/g, ''));
+        return isNaN(n) ? 0 : Math.round(n * 100);
+    };
+
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        const stmt = db.prepare(`INSERT OR REPLACE INTO products
+            (id, title, price, price_cents, stock, desc, rating, reviews, category, badge, imageMain, imageHover, variants)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        let imported = 0;
+        for (const p of list) {
+            if (!p || !p.title) continue;
+            const variants = typeof p.variants === 'string'
+                ? p.variants
+                : (p.variants ? JSON.stringify(p.variants) : null);
+            stmt.run(
+                p.id || null, String(p.title).slice(0, 200), p.price || '', toCents(p.price),
+                p.stock != null ? p.stock : 100, p.desc || '',
+                p.rating != null ? p.rating : 5, p.reviews != null ? p.reviews : 0,
+                p.category || '', p.badge || '', p.imageMain || '', p.imageHover || '', variants
+            );
+            imported++;
+        }
+        stmt.finalize();
+        db.run('COMMIT', (err) => {
+            if (err) return res.status(500).json({ error: 'Error al importar' });
+            res.json({ imported });
+        });
     });
 });
 
