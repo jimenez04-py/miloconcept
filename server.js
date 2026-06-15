@@ -367,6 +367,28 @@ function consumeShipping(ref) {
     return v.shipping;
 }
 
+// Cache temporal: external_reference -> items del carrito.
+// Sirve de respaldo si Mercado Pago no devuelve additional_info.items en el pago,
+// para que el pedido SIEMPRE se pueda registrar.
+const pendingItemsByRef = new Map();
+function rememberItems(ref, items) {
+    if (!ref || !Array.isArray(items) || items.length === 0) return;
+    pendingItemsByRef.set(ref, { items, ts: Date.now() });
+    if (pendingItemsByRef.size > 500) {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        for (const [k, v] of pendingItemsByRef) {
+            if (v.ts < cutoff) pendingItemsByRef.delete(k);
+        }
+    }
+}
+function consumeItems(ref) {
+    if (!ref) return null;
+    const v = pendingItemsByRef.get(ref);
+    if (!v) return null;
+    pendingItemsByRef.delete(ref);
+    return v.items;
+}
+
 // Sanitiza el objeto de dirección que llega del front antes de guardarlo
 function sanitizeShipping(addr) {
     if (!addr || typeof addr !== 'object') return null;
@@ -456,10 +478,19 @@ app.post('/create_preference', async (req, res) => {
             },
         };
 
-        // Guardamos la dirección de envío que el cliente llenó en la mini-encuesta
-        // para asociarla al pedido cuando el pago se confirme.
+        // auto_return: regresa al cliente a la tienda automáticamente al aprobar
+        // el pago (sin que tenga que dar clic en "Volver al sitio"). Así se dispara
+        // /finalize_order y el pedido SÍ se guarda. MP exige una URL pública real
+        // (rechaza localhost), por eso solo lo activamos con https://.
+        if (/^https:\/\//i.test(baseUrl)) {
+            body.auto_return = 'approved';
+        }
+
+        // Guardamos la dirección de envío y los items que el cliente llenó,
+        // para asociarlos al pedido cuando el pago se confirme.
         const shipping = sanitizeShipping(req.body.shipping_address);
         if (shipping) rememberShipping(externalRef, shipping);
+        rememberItems(externalRef, items);
 
         const preference = new Preference(client);
         const result = await preference.create({ body });
@@ -543,8 +574,13 @@ async function processPaidPayment(paymentId) {
         email: (mp.payer && mp.payer.email) || 'guest@example.com'
     };
 
-    // Reconstruct items from MP additional_info (set by SDK from preference items)
-    const mpItems = (mp.additional_info && mp.additional_info.items) || [];
+    // Reconstruct items from MP additional_info (set by SDK from preference items).
+    // Si MP no los devuelve, usamos los que guardamos al crear la preferencia.
+    let mpItems = (mp.additional_info && mp.additional_info.items) || [];
+    if (mpItems.length === 0) {
+        const cached = consumeItems(mp.external_reference);
+        if (cached && cached.length) mpItems = cached;
+    }
     if (mpItems.length === 0) return { ok: false, error: 'Pago sin items reconocibles' };
 
     // Match titles back to DB products to get IDs (for stock decrement)
