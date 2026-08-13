@@ -57,6 +57,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         safeAddColumn(`ALTER TABLE products ADD COLUMN variants TEXT`);
         safeAddColumn(`ALTER TABLE products ADD COLUMN price_cents INTEGER DEFAULT 0`);
         safeAddColumn(`ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 100`);
+        safeAddColumn(`ALTER TABLE products ADD COLUMN sold_out INTEGER DEFAULT 0`);
         safeAddColumn(`ALTER TABLE orders ADD COLUMN email TEXT`);
         safeAddColumn(`ALTER TABLE orders ADD COLUMN shipping_address TEXT`);
 

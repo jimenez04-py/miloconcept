@@ -14,3 +14,7 @@ database.sqlite
 
 # Recibos generados (contienen datos de clientes)
 receipts/
+
+# Proyectos aparte anidados en esta carpeta (tienen su propio repo)
+crmsts/
+vex-hero/

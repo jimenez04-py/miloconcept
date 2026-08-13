@@ -294,6 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitle.innerText = title;
         modalDesc.innerText = desc;
         modalPrice.innerText = price;
+
+        // Producto agotado: el botón de agregar queda deshabilitado
+        const addBtnEl = document.querySelector('.modal-add-btn');
+        if (addBtnEl) addBtnEl.disabled = !!productData.sold_out;
         // Fallback persistente por si la imagen del producto/tono no carga.
         modalImg.onerror = () => { if (modalImg.src !== PLACEHOLDER_IMG) modalImg.src = PLACEHOLDER_IMG; };
         modalImg.src = imgSrc;
@@ -486,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cartItemsContainer.innerHTML = cart.map((item, i) => `
                     <div class="cart-item">
                         <div class="cart-item-img">
-                            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">
+                            <img src="${escapeHtml(item.image || PLACEHOLDER_IMG)}" alt="${escapeHtml(item.title)}">
                         </div>
                         <div class="cart-item-info">
                             <h4>${escapeHtml(item.title)}</h4>
@@ -772,8 +776,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${product.badge ? `<span class="pill-badge">${escapeHtml(product.badge)}</span>` : '<span></span>'}
                         </div>
                         <div class="card-image-area">
-                            <img src="${escapeHtml(product.imageMain)}" alt="${escapeHtml(product.title)}" class="product-img main-img" loading="lazy">
-                            <img src="${escapeHtml(product.imageHover)}" alt="${escapeHtml(product.title)} swatch" class="product-img hover-img" loading="lazy">
+                            ${product.sold_out ? '<span class="soldout-pill">Agotado</span>' : ''}
+                            <img src="${escapeHtml(product.imageMain || PLACEHOLDER_IMG)}" alt="${escapeHtml(product.title)}" class="product-img main-img" loading="lazy">
+                            <img src="${escapeHtml(product.imageHover || product.imageMain || PLACEHOLDER_IMG)}" alt="${escapeHtml(product.title)} swatch" class="product-img hover-img" loading="lazy">
                         </div>
                         <div class="card-details">
                             <div class="rating">
@@ -784,11 +789,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="price">${escapeHtml(product.price)}</span>
                             </div>
                             <p class="desc">${escapeHtml(product.desc)}</p>
-                            <button class="add-to-cart-btn">Comprar</button>
+                            <button class="add-to-cart-btn"${product.sold_out ? ' disabled' : ''}>${product.sold_out ? 'Agotado' : 'Comprar'}</button>
                         </div>
                     `;
 
                     attachImgFallback(card);
+
+                    if (product.sold_out) card.classList.add('is-soldout');
 
                     const buyBtn = card.querySelector('.add-to-cart-btn');
                     buyBtn.addEventListener('click', (e) => {

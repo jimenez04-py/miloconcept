@@ -116,28 +116,6 @@ button {
     background: var(--color-matte-black);
 }
 
-/* Announcement bar (free shipping etc) */
-.announcement-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: #f1ede7;
-    color: var(--color-text-dark);
-    text-align: center;
-    padding: 12px 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    z-index: 101;
-}
-
-/* Push the header down below the announcement bar */
-body.has-announcement .header {
-    top: 42px;
-}
-
 .logo {
     position: absolute;
     /* Center absolute */
@@ -149,22 +127,16 @@ body.has-announcement .header {
 }
 
 .logo-img {
-    height: 180px;
-    /* Reduced from 250px for better desktop fit too */
+    height: 64px;
     width: auto;
     object-fit: contain;
     transition: filter 0.4s ease;
 }
 
-/* On hero (dark bg image) — invert logo to white */
-.header--on-hero .logo-img {
-    filter: brightness(0) invert(1);
-}
 
 @media (max-width: 768px) {
     .logo-img {
-        height: 120px;
-        /* Even smaller for mobile */
+        height: 48px;
     }
 }
 
@@ -239,8 +211,7 @@ body.has-announcement .header {
     }
 
     .logo-img {
-        height: 80px;
-        /* Much smaller logo for header */
+        height: 48px;
     }
 
     .menu-icon {
@@ -279,6 +250,8 @@ body.has-announcement .header {
     align-items: center; /* Center vertically for a high-end editorial layout */
     text-align: left;
     /* allow header to overlap on top */
+    /* Pearl satin backdrop extends the product photo's own background */
+    background: radial-gradient(130% 100% at 78% 35%, #eee2dd 0%, #e9dad5 55%, #decfc9 100%);
 }
 
 .hero-image-container {
@@ -297,18 +270,36 @@ body.has-announcement .header {
     will-change: transform;
 }
 
+/* Product-only hero shot: pinned to the bottom-left, top and right edges fade
+   into the .hero gradient so the photo's crop lines are invisible */
+.hero .hero-product-img {
+    position: absolute;
+    left: 7%;
+    bottom: 0;
+    width: auto;
+    height: 74%;
+    object-fit: contain;
+    object-position: left bottom;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 78%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 12%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 78%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 12%);
+    mask-composite: intersect;
+}
+
 .hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* smooth light gradient from transparent on the left (model) to white/pearl on the right (text) */
-    background: linear-gradient(90deg, 
-        rgba(255, 255, 255, 0) 0%, 
-        rgba(255, 255, 255, 0.2) 35%, 
-        rgba(255, 255, 255, 0.7) 65%, 
-        rgba(255, 255, 255, 0.95) 100%);
+    /* soft pearl veil from transparent on the left (product) to solid on the right (text) */
+    background: linear-gradient(90deg,
+        rgba(233, 218, 213, 0) 42%,
+        rgba(233, 218, 213, 0.35) 60%,
+        rgba(238, 226, 221, 0.75) 80%,
+        rgba(240, 229, 224, 0.9) 100%);
 }
 
 .hero-content {
@@ -472,6 +463,33 @@ body.has-announcement .header {
     padding: 0;
 }
 
+/* Producto agotado en la tienda */
+.soldout-pill {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    background: rgba(53, 53, 53, 0.92);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 999px;
+}
+
+.product-card.is-soldout .product-img {
+    filter: grayscale(65%);
+    opacity: 0.72;
+}
+
+.add-to-cart-btn:disabled,
+.modal-add-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .pill-badge {
     background: transparent;
     color: var(--color-matte-black);
@@ -485,6 +503,7 @@ body.has-announcement .header {
 }
 
 .card-image-area {
+    position: relative;
     flex-grow: 1;
     display: flex;
     align-items: center;
@@ -1037,8 +1056,8 @@ body.has-announcement .header {
     }
 
     .hero-overlay {
-        /* Add a slightly more solid light overlay on mobile to ensure dark text is readable over the model image */
-        background: rgba(255, 255, 255, 0.55);
+        /* Solid pearl veil on mobile so the dark text stays readable over the product */
+        background: rgba(240, 230, 225, 0.6);
     }
 
     .hero-content {
@@ -1614,19 +1633,17 @@ body.has-announcement .header {
 }
 
 .auth-logo {
-    margin-bottom: -10px;
-    /* Reduced from 40px to compensate for larger size */
+    margin-bottom: 20px;
 }
 
 .auth-logo img {
-    height: 320px;
+    height: 140px;
     width: auto;
 }
 
 @media (max-width: 768px) {
     .auth-logo img {
-        height: 200px;
-        /* Significantly smaller for mobile screens */
+        height: 110px;
     }
 
     .auth-box {
@@ -2227,9 +2244,9 @@ textarea:focus-visible,
 .header--on-hero::before {
     content: '';
     position: absolute;
-    inset: -42px 0 auto 0;
+    inset: 0 0 auto 0;
     height: 160px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    background: linear-gradient(180deg, rgba(240, 231, 226, 0.55), rgba(240, 231, 226, 0));
     pointer-events: none;
     z-index: -1;
 }

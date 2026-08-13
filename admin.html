@@ -142,12 +142,119 @@
             flex: 1;
         }
 
-        .btn-delete {
-            color: red;
-            cursor: pointer;
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-edit,
+        .btn-del {
+            padding: 7px 18px;
+            border-radius: 999px;
+            font-size: 0.78rem;
             font-weight: 600;
-            border: none;
-            background: none;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid;
+            transition: all 0.25s ease;
+        }
+
+        .btn-edit {
+            border-color: #d8d2c9;
+            color: #353535;
+        }
+
+        .btn-edit:hover {
+            background: #353535;
+            border-color: #353535;
+            color: #fff;
+        }
+
+        .btn-del {
+            border-color: #e5cfcb;
+            color: #a8443a;
+        }
+
+        .btn-del:hover {
+            background: #a8443a;
+            border-color: #a8443a;
+            color: #fff;
+        }
+
+        /* Interruptor "Agotado" estilo Apple */
+        .switch-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #e2dcd4;
+            border-radius: 999px;
+            transition: background 0.25s ease;
+            cursor: pointer;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            left: 2px;
+            top: 2px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.25s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        .switch input:checked+.slider {
+            background: #353535;
+        }
+
+        .switch input:checked+.slider::before {
+            transform: translateX(18px);
+        }
+
+        .switch input:disabled+.slider {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        /* Producto marcado como agotado: se atenúa en la lista */
+        .product-item.is-soldout img {
+            filter: grayscale(70%);
+            opacity: 0.6;
+        }
+
+        .product-item.is-soldout .product-info {
+            opacity: 0.55;
         }
 
         /* --- Sección de Pedidos --- */
@@ -251,13 +358,14 @@
             margin-bottom: 4px;
         }
     </style>
+    <link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 
 <body>
 
     <header class="header">
         <div class="logo">
-            <span class="logo-text">Milo Concept</span>
+            <img src="images/milologo.png" alt="Milo Concept" class="logo-img">
         </div>
         <nav class="desktop-nav">
             <a href="index.html" class="nav-link">Inicio</a>
@@ -476,17 +584,24 @@
                 }
 
                 container.innerHTML = products.map(p => `
-                    <div class="product-item">
-                        <img src="${escapeHtml(p.imageMain)}" alt="${escapeHtml(p.title)}">
+                    <div class="product-item${p.sold_out ? ' is-soldout' : ''}" data-id="${p.id}">
+                        <img src="${escapeHtml(p.imageMain || PLACEHOLDER_IMG)}" alt="${escapeHtml(p.title)}">
                         <div class="product-info">
                             <strong>${escapeHtml(p.title)}</strong>
                             ${p.badge ? `<span style="background:#000; color:#fff; padding:2px 6px; font-size:10px; border-radius:4px; margin-left:5px;">${escapeHtml(p.badge)}</span>` : ''}
                             <br>
                             <small>${escapeHtml(p.category)} | ${escapeHtml(p.price)}</small>
                         </div>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-delete" style="color:blue;" onclick="editProduct(${p.id})">Editar</button>
-                            <button class="btn-delete" onclick="deleteProduct(${p.id})">Eliminar</button>
+                        <div class="item-actions">
+                            <span class="switch-wrap" title="El producto se muestra en la tienda como agotado y no se puede comprar">
+                                <span class="switch-label">Agotado</span>
+                                <label class="switch">
+                                    <input type="checkbox" class="soldout-toggle" data-id="${p.id}" ${p.sold_out ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                            </span>
+                            <button class="btn-edit" onclick="editProduct(${p.id})">Editar</button>
+                            <button class="btn-del" onclick="deleteProduct(${p.id})">Eliminar</button>
                         </div>
                     </div>
                 `).join('');
@@ -498,6 +613,34 @@
                 container.innerHTML = `<p style="color:red;">${msg}<br>Check console for more details.</p>`;
             }
         }
+
+        // Interruptor "Agotado" — delegado para sobrevivir a los re-renders
+        document.getElementById('product-list-container').addEventListener('change', async (e) => {
+            const toggle = e.target;
+            if (!toggle.classList.contains('soldout-toggle')) return;
+            const id = toggle.dataset.id;
+            const on = toggle.checked;
+            toggle.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/products/${id}/sold-out`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ sold_out: on })
+                });
+                if (!res.ok) throw new Error((await res.json()).error || 'Error del servidor');
+                toggle.closest('.product-item').classList.toggle('is-soldout', on);
+                const p = (window.allProducts || []).find(x => x.id == id);
+                if (p) p.sold_out = on ? 1 : 0;
+            } catch (err) {
+                alert('No se pudo actualizar el estado: ' + err.message);
+                toggle.checked = !on;
+            } finally {
+                toggle.disabled = false;
+            }
+        });
 
         // Edit Product
         function editProduct(id) {
@@ -526,7 +669,7 @@
 
             const btn = document.querySelector('.btn-submit');
             btn.innerText = "Actualizar Producto";
-            btn.style.backgroundColor = "#007bff";
+            btn.style.backgroundColor = "#353535";
 
             // Scroll to form
             document.querySelector('.admin-card').scrollIntoView({ behavior: 'smooth' });

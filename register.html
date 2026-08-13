@@ -9,6 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;700;800&display=swap"
         rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 
 <body class="auth-page">
@@ -17,7 +18,7 @@
         <div class="auth-box">
             <div class="auth-logo">
                 <a href="index.html">
-                    <span class="logo-text">Milo Concept</span>
+                    <img src="images/milologo.png" alt="Milo Concept" class="logo-img">
                 </a>
             </div>
             <h2 class="auth-title">Creado para ti</h2>
@@ -59,7 +60,7 @@
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             try {

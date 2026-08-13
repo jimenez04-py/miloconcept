@@ -24,6 +24,7 @@ app.use(helmet({
         directives: {
             "default-src": ["'self'"],
             "script-src": ["'self'", "'unsafe-inline'", "https://sdk.mercadopago.com"],
+            "script-src-attr": ["'unsafe-inline'"],
             "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
             "img-src": ["'self'", "data:", "https:"],
@@ -220,6 +221,16 @@ app.put('/products/:id', requireAdmin, (req, res) => {
     });
 });
 
+// Toggle "agotado" (admin only) — keeps the product visible but not purchasable
+app.patch('/products/:id/sold-out', requireAdmin, (req, res) => {
+    const value = req.body.sold_out ? 1 : 0;
+    db.run(`UPDATE products SET sold_out = ? WHERE id = ?`, [value, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Product not found' });
+        res.json({ message: 'Product updated', sold_out: value });
+    });
+});
+
 // Delete Product (admin only)
 app.delete('/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
@@ -246,8 +257,8 @@ app.post('/admin/products/import', requireAdmin, (req, res) => {
     db.serialize(() => {
         db.run('BEGIN TRANSACTION');
         const stmt = db.prepare(`INSERT OR REPLACE INTO products
-            (id, title, price, price_cents, stock, desc, rating, reviews, category, badge, imageMain, imageHover, variants)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+            (id, title, price, price_cents, stock, desc, rating, reviews, category, badge, imageMain, imageHover, variants, sold_out)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
         let imported = 0;
         for (const p of list) {
             if (!p || !p.title) continue;
@@ -258,7 +269,8 @@ app.post('/admin/products/import', requireAdmin, (req, res) => {
                 p.id || null, String(p.title).slice(0, 200), p.price || '', toCents(p.price),
                 p.stock != null ? p.stock : 100, p.desc || '',
                 p.rating != null ? p.rating : 5, p.reviews != null ? p.reviews : 0,
-                p.category || '', p.badge || '', p.imageMain || '', p.imageHover || '', variants
+                p.category || '', p.badge || '', p.imageMain || '', p.imageHover || '', variants,
+                p.sold_out ? 1 : 0
             );
             imported++;
         }
@@ -275,8 +287,9 @@ app.post('/admin/products/import', requireAdmin, (req, res) => {
 // --------------------------------------------------------------------------
 
 app.post('/register', rateLimit({ windowMs: 60_000, max: 5 }), (req, res) => {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    email = String(email).trim();
 
     // Basic validations
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -292,7 +305,7 @@ app.post('/register', rateLimit({ windowMs: 60_000, max: 5 }), (req, res) => {
         if (err) return res.status(500).json({ error: 'Encryption error' });
 
         const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-        db.run(sql, [name, email.toLowerCase(), hash], function (err) {
+        db.run(sql, [name, email.trim().toLowerCase(), hash], function (err) {
             if (err) {
                 if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'El correo electrónico ya existe' });
                 return res.status(500).json({ error: 'Database error' });
@@ -306,13 +319,17 @@ app.post('/login', rateLimit({ windowMs: 60_000, max: 8 }), (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Credenciales inválidas' });
 
-    db.get(`SELECT * FROM users WHERE email = ?`, [String(email).toLowerCase()], (err, user) => {
+    db.get(`SELECT * FROM users WHERE email = ?`, [String(email).trim().toLowerCase()], (err, user) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         // Same generic message whether user exists or password is wrong (avoid email enumeration)
         if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
 
         bcrypt.compare(password, user.password, (err, result) => {
             if (!result) return res.status(401).json({ error: 'Credenciales inválidas' });
+
+            // Successful logins don't count against the rate limit —
+            // only failed attempts should be able to lock someone out
+            rateBuckets.delete(`${req.ip}:${req.path}`);
 
             const userIsAdmin = isAdminEmail(user.email);
             const token = jwt.sign(
@@ -418,7 +435,7 @@ app.post('/create_preference', async (req, res) => {
 
         const placeholders = ids.map(() => '?').join(',');
         const dbRows = await new Promise((resolve, reject) => {
-            db.all(`SELECT id, title, price, price_cents, stock FROM products WHERE id IN (${placeholders})`, ids,
+            db.all(`SELECT id, title, price, price_cents, stock, sold_out FROM products WHERE id IN (${placeholders})`, ids,
                 (err, rows) => err ? reject(err) : resolve(rows));
         });
         const dbById = new Map(dbRows.map(r => [r.id, r]));
@@ -429,6 +446,9 @@ app.post('/create_preference', async (req, res) => {
             const p = dbById.get(Number(it.id));
             if (!p) return res.status(400).json({ error: `Producto no encontrado: ${it.id}` });
             const qty = Math.max(1, Math.min(99, parseInt(it.quantity, 10) || 1));
+            if (p.sold_out) {
+                return res.status(409).json({ error: `Producto agotado: ${p.title}`, product_id: p.id });
+            }
             if ((p.stock || 0) < qty) {
                 return res.status(409).json({ error: `Sin stock suficiente: ${p.title}`, product_id: p.id });
             }
