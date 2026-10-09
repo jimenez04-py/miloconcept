@@ -381,10 +381,26 @@ button {
     line-height: 1.4;
 }
 
+/* Nota de encargos bajo el texto principal */
+.intro-text .intro-note {
+    font-family: var(--font-main);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-text-light);
+    line-height: 2.2;
+    margin-top: 28px;
+}
+
 @media (max-width: 768px) {
     .intro-text p {
         font-size: 1.8rem;
         /* Scaled down for mobile */
+    }
+
+    .intro-text .intro-note {
+        font-size: 0.72rem;
     }
 }
 
