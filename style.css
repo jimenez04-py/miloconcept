@@ -376,31 +376,44 @@ button {
 
 .intro-text p {
     font-family: var(--font-serif);
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     color: var(--color-text-dark);
     line-height: 1.4;
 }
 
-/* Nota de encargos bajo el texto principal */
-.intro-text .intro-note {
-    font-family: var(--font-main);
-    font-size: 0.8rem;
-    letter-spacing: 2px;
+/* Ceja superior: el dato práctico sale del bloque principal */
+.intro-eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
     text-transform: uppercase;
     font-weight: 600;
     color: var(--color-text-light);
-    line-height: 2.2;
-    margin-top: 28px;
+    margin-bottom: 20px;
+}
+
+.intro-text p em {
+    font-style: italic;
+}
+
+/* Línea-enlace discreta hacia Instagram */
+.intro-link {
+    display: inline-block;
+    margin-top: 30px;
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 3px;
 }
 
 @media (max-width: 768px) {
     .intro-text p {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         /* Scaled down for mobile */
-    }
-
-    .intro-text .intro-note {
-        font-size: 0.72rem;
     }
 }
 
